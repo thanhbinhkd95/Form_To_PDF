@@ -1,0 +1,2992 @@
+/* Global design tokens */
+:root {
+  /* Brand palette */
+  --color-primary: #0ea5e9; /* sky-500 */
+  --color-primary-600: #0284c7;
+  --color-secondary: #22c55e; /* green-500 */
+  --color-accent: #f59e0b; /* amber-500 */
+  --color-danger: #ef4444; /* red-500 */
+
+  /* Neutrals */
+  --color-bg: #f8fafc; /* slate-50 */
+  --color-surface: #ffffff;
+  --color-text: #0f172a; /* slate-900 */
+  --color-subtext: #475569; /* slate-600 */
+  --color-border: #e2e8f0; /* slate-200 */
+
+  /* Spacing scale (4px baseline) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Radius and shadow */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+
+  /* Typography */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+}
+
+/* CSS reset (minimal) */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* Layout helpers */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+.grid-1 { display: grid; gap: var(--space-4); }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.gap-2 { gap: var(--space-2); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+
+/* Typography */
+h1, h2, h3 { margin: 0 0 var(--space-4); }
+p { margin: 0 0 var(--space-3); color: var(--color-subtext); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: var(--text-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s, box-shadow .2s;
+}
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--color-primary-600); }
+.btn-secondary {
+  background: white;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-danger { background: var(--color-danger); color: white; }
+
+/* Forms */
+.form-input label { display: block; font-size: var(--text-sm); margin-bottom: var(--space-3); }
+.form-input input,
+.form-input textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  outline: none;
+  background: white;
+}
+.form-input textarea { min-height: 96px; resize: vertical; }
+.form-input input:focus, .form-input textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14,165,233,0.15);
+}
+
+/* Input borders - Japanese Standard */
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.form-control:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.1), 0 2px 8px rgba(30,58,138,0.15);
+  transform: translateY(-1px);
+}
+.form-control:hover {
+  border-color: #cbd5e1;
+}
+
+/* Preview area */
+.preview { background: var(--color-surface); }
+.preview img { border: 1px solid var(--color-border); }
+
+/* Print styles for consistent PDF rendering */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  @page {
+    margin: 0;
+    size: A4;
+  }
+  
+  html, body { 
+    background: white !important; 
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  
+  .no-print { display: none !important; }
+  .preview-page-header,
+  .preview-page-footer,
+  .preview-page-actions,
+  .btn,
+  button { display: none !important; }
+  
+  .preview-page {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  
+  .preview-container {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    min-height: auto !important;
+    background: white !important;
+  }
+  
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: white !important;
+  }
+  
+  /* Application Form Print Styles */
+  .application-form {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'MS Gothic', 'Helvetica', 'Arial', sans-serif !important;
+    line-height: 1.5 !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure all elements have no margins/padding for print */
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Reset any container margins */
+  .container, .main-content, .form-section {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  
+  .application-form-header {
+    text-align: center !important;
+    margin-bottom: 20px !important;
+    border-bottom: 2px solid #000 !important;
+    padding-bottom: 15px !important;
+    page-break-after: avoid !important;
+  }
+  
+  .form-title {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    margin: 0 0 8px 0 !important;
+    color: #000 !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .form-instruction {
+    font-size: 10px !important;
+    margin: 0 !important;
+    color: #333 !important;
+    line-height: 1.6 !important;
+    page-break-after: avoid !important;
+  }
+  
+  .form-section {
+    margin-bottom: 20px !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .section-header {
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid #333 !important;
+    padding-bottom: 6px !important;
+    page-break-after: avoid !important;
+  }
+  
+  .section-title {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    margin: 0 0 4px 0 !important;
+    color: #000 !important;
+    letter-spacing: 0.3px !important;
+  }
+  
+  .section-subtitle {
+    font-size: 9px !important;
+    margin: 0 !important;
+    color: #666 !important;
+  }
+  
+  /* Subsection Title */
+  .subsection-title {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 8px 0 !important;
+    color: #222 !important;
+    border-bottom: 1px solid #ccc !important;
+    padding-bottom: 4px !important;
+    page-break-after: avoid !important;
+  }
+  
+  /* Personal Info Layout Print */
+  .personal-info-with-photo-preview {
+    display: flex !important;
+    gap: 20px !important;
+    align-items: flex-start !important;
+    margin-bottom: 15px !important;
+    padding: 12px !important;
+    background: #fafbfc !important;
+    border-radius: 4px !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .personal-info-fields-preview {
+    flex: 1 !important;
+  }
+  
+  .name-fields-grid-preview {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .photo-section-preview {
+    flex-shrink: 0 !important;
+    width: 100px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .photo-frame-preview {
+    width: 80px !important;
+    height: 107px !important;
+    border: 1px solid #000 !important;
+    border-radius: 4px !important;
+    background: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+  }
+  
+  .photo-placeholder {
+    text-align: center !important;
+    color: #666 !important;
+    font-size: 8px !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Personal Info Grid */
+  .personal-info-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .personal-info-column {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  /* Info Rows Print Styles */
+  .info-row {
+    display: flex !important;
+    margin-bottom: 8px !important;
+    align-items: flex-start !important;
+    min-height: 18px !important;
+  }
+  
+  .info-label {
+    font-weight: bold !important;
+    min-width: 120px !important;
+    margin-right: 10px !important;
+    font-size: 10px !important;
+    color: #000 !important;
+    line-height: 1.4 !important;
+  }
+  
+  .info-value {
+    flex: 1 !important;
+    font-size: 10px !important;
+    color: #333 !important;
+    border-bottom: 1px solid #666 !important;
+    padding-bottom: 2px !important;
+    min-height: 16px !important;
+    line-height: 1.4 !important;
+  }
+  
+  /* Info Grid Print */
+  .info-grid-2 {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+  
+  .info-grid-2 .info-row {
+    flex: 1 !important;
+    min-width: 45% !important;
+  }
+  
+  .info-grid-3 {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  
+  .info-grid-3 .info-row {
+    flex: 1 !important;
+    min-width: 30% !important;
+  }
+  
+  /* Data Tables Print */
+  .data-table {
+    margin: 12px 0 !important;
+    border: 1px solid #000 !important;
+    font-size: 9px !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: white !important;
+  }
+  
+  .table-header {
+    display: flex !important;
+    background: #f0f0f0 !important;
+    border-bottom: 1px solid #000 !important;
+  }
+  
+  .table-row {
+    display: flex !important;
+    border-bottom: 1px solid #666 !important;
+  }
+  
+  .table-row:last-child {
+    border-bottom: none !important;
+  }
+  
+  .table-row:nth-child(even) {
+    background: #fafafa !important;
+  }
+  
+  .table-cell {
+    padding: 6px 4px !important;
+    border-right: 1px solid #666 !important;
+    word-wrap: break-word !important;
+    min-height: 18px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    line-height: 1.3 !important;
+  }
+  
+  .table-cell:last-child {
+    border-right: none !important;
+  }
+  
+  .header-cell {
+    font-weight: bold !important;
+    background: #f0f0f0 !important;
+    text-align: center !important;
+    font-size: 10px !important;
+  }
+  
+  /* Japanese/English Labels Print */
+  .info-row-jp-en {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    margin-bottom: 10px !important;
+    min-height: 24px !important;
+  }
+  
+  .info-label-jp-en {
+    display: flex !important;
+    flex-direction: column !important;
+    font-weight: 600 !important;
+    min-width: 140px !important;
+    margin-right: 10px !important;
+  }
+  
+  .info-label-jp-en .label-japanese {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    line-height: 1.3 !important;
+  }
+  
+  .info-label-jp-en .label-english {
+    font-size: 9px !important;
+    font-weight: 400 !important;
+    color: #666 !important;
+    line-height: 1.2 !important;
+    margin-top: 1px !important;
+  }
+  
+  .name-japanese {
+    font-size: 11px !important;
+    color: #000 !important;
+    font-weight: 500 !important;
+    margin-bottom: 2px !important;
+    line-height: 1.3 !important;
+  }
+  
+  .name-english {
+    font-size: 9px !important;
+    color: #666 !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Address Display Print */
+  .address-table {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .address-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  
+  .address-label {
+    display: flex !important;
+    flex-direction: column !important;
+    font-weight: 600 !important;
+    color: #000 !important;
+    font-size: 10px !important;
+  }
+  
+  .address-value {
+    margin-left: 0 !important;
+  }
+  
+  .value-content {
+    font-size: 10px !important;
+    color: #000 !important;
+    line-height: 1.4 !important;
+    padding: 6px 0 !important;
+    border-bottom: 1px solid #000 !important;
+    min-height: 30px !important;
+  }
+  
+  .address-japanese {
+    font-size: 10px !important;
+    color: #000 !important;
+    font-weight: 500 !important;
+    margin-bottom: 3px !important;
+    line-height: 1.3 !important;
+  }
+  
+  .address-english {
+    font-size: 9px !important;
+    color: #666 !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Text Content Print */
+  .text-content-row {
+    margin-bottom: 12px !important;
+  }
+  
+  .text-content-label {
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .text-content-value {
+    margin-left: 0 !important;
+  }
+  
+  .text-japanese {
+    font-size: 10px !important;
+    color: #000 !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    margin-bottom: 6px !important;
+    padding: 8px !important;
+    background: white !important;
+    border: 1px solid #000 !important;
+    border-radius: 2px !important;
+    min-height: 40px !important;
+  }
+  
+  .text-english {
+    font-size: 9px !important;
+    color: #666 !important;
+    font-weight: 400 !important;
+    line-height: 1.3 !important;
+    padding: 8px !important;
+    background: #f8f8f8 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 2px !important;
+    min-height: 30px !important;
+  }
+  
+  /* Sponsor and Plan Sections Print */
+  .sponsor-basic-info,
+  .sponsor-address-section,
+  .sponsor-contact-info,
+  .sponsor-employment-info,
+  .sponsor-financial-info,
+  .plan-description,
+  .educational-plan,
+  .career-plan,
+  .plan-additional {
+    margin-bottom: 15px !important;
+    padding: 12px !important;
+    background: #fafbfc !important;
+    border-radius: 3px !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* Employment and Family Questions */
+  .employment-question,
+  .family-japan-question {
+    margin-bottom: 10px !important;
+    font-size: 10px !important;
+  }
+  
+  /* Proficiency Tests */
+  .proficiency-test {
+    margin-bottom: 12px !important;
+  }
+  
+  .test-name {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    margin: 0 0 6px 0 !important;
+    color: #000 !important;
+  }
+  
+  .other-proficiency {
+    margin-top: 10px !important;
+    font-size: 9px !important;
+  }
+  
+  /* No Data */
+  .no-data {
+    text-align: center !important;
+    color: #999 !important;
+    font-style: italic !important;
+    padding: 15px !important;
+    border: 1px dashed #ccc !important;
+    margin: 10px 0 !important;
+  }
+}
+
+/* === Extended theme tokens from reference (no Tailwind dependency) === */
+:root {
+  /* Base */
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-family: Inter, system-ui, sans-serif;
+  --font-size-base: 16px;
+
+  /* Brand */
+  --color-primary: var(--color-primary, #3b82f6);
+  --color-secondary: #1e40af;
+  --color-accent: #60a5fa;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Backgrounds */
+  --color-background: var(--color-background, #ffffff);
+  --color-background-secondary: #f8fafc;
+  --color-background-tertiary: #f1f5f9;
+
+  /* Surfaces */
+  --color-surface: var(--color-surface, #ffffff);
+  --color-surface-secondary: #f8fafc;
+  --color-surface-tertiary: #f1f5f9;
+
+  /* Text */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-text-tertiary: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+}
+
+/* Dark mode overrides */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --color-primary: #60a5fa;
+  --color-secondary: #a78bfa;
+  --color-accent: #93c5fd;
+
+  --color-background: #0a0a0a;
+  --color-background-secondary: #1a1a1a;
+  --color-background-tertiary: #2a2a2a;
+
+  --color-surface: #1a1a1a;
+  --color-surface-secondary: #2a2a2a;
+  --color-surface-tertiary: #3a3a3a;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #71717a;
+  --color-text-inverse: #000000;
+
+  --color-border: #3a3a3a;
+  --color-border-secondary: #525252;
+}
+
+/* Base body typography from theme */
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+/* Brand/background utilities */
+.bg-theme-primary { background-color: var(--color-primary); }
+.bg-theme-secondary { background-color: var(--color-secondary); }
+.bg-theme-secondary-dark { background-color: var(--color-secondary-dark, #4f46e5); }
+.bg-theme-accent { background-color: var(--color-accent); }
+.bg-theme-success { background-color: var(--color-success); }
+.bg-theme-warning { background-color: var(--color-warning); }
+.bg-theme-error { background-color: var(--color-error); }
+.bg-theme-info { background-color: var(--color-info); }
+
+.bg-theme-background { background-color: var(--color-background); }
+.bg-theme-background-secondary { background-color: var(--color-background-secondary); }
+.bg-theme-background-tertiary { background-color: var(--color-background-tertiary); }
+
+/* Surface utilities */
+.bg-theme-surface { background-color: var(--color-surface); }
+.bg-theme-surface-secondary { background-color: var(--color-surface-secondary); }
+.bg-theme-surface-tertiary { background-color: var(--color-surface-tertiary); }
+
+/* Text utilities */
+.text-theme-primary { color: var(--color-primary); }
+.text-theme-secondary { color: var(--color-secondary); }
+.text-theme-accent { color: var(--color-accent); }
+.text-theme-success { color: var(--color-success); }
+.text-theme-warning { color: var(--color-warning); }
+.text-theme-error { color: var(--color-error); }
+.text-theme-info { color: var(--color-info); }
+
+.text-theme-text-primary { color: var(--color-text-primary); }
+.text-theme-text-secondary { color: var(--color-text-secondary); }
+.text-theme-text-tertiary { color: var(--color-text-tertiary); }
+.text-theme-text-inverse { color: var(--color-text-inverse); }
+
+/* Border utilities */
+.border-theme-primary { border-color: var(--color-primary); }
+.border-theme-secondary { border-color: var(--color-secondary); }
+.border-theme-accent { border-color: var(--color-accent); }
+.border-theme-success { border-color: var(--color-success); }
+.border-theme-warning { border-color: var(--color-warning); }
+.border-theme-error { border-color: var(--color-error); }
+.border-theme-info { border-color: var(--color-info); }
+.border-theme-border { border-color: var(--color-border); }
+.border-theme-border-secondary { border-color: var(--color-border-secondary); }
+
+/* Placeholder tones */
+input::placeholder, textarea::placeholder { color: var(--color-text-secondary); }
+input:focus::placeholder, textarea:focus::placeholder { color: var(--color-text-tertiary); }
+
+/* Hover/focus helpers */
+.hover\:opacity-80:hover { opacity: 0.8; }
+.focus\:ring-2:focus {
+  --tw-ring-inset: var(--tw-empty,/*!*/ /*!*/);
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,0.5);
+  --tw-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+
+/* Animations: blob, fade-in, ripple */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-blob { animation: blob 7s infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+.animate-ripple { animation: ripple 0.6s ease-out; }
+
+
+/* ====== Form aesthetics inspired by pattern.jsx (no Tailwind) ====== */
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 32px 0 24px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-left: 6px solid #1e3a8a;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  position: relative;
+}
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  border-radius: 3px 0 0 3px;
+}
+.divider { height: 1px; background: #dbeafe; margin: 16px 0; }
+.panel { 
+  background: #f1f5f9; 
+  border: 2px solid #1e3a8a;
+  border-left: 8px solid #1e3a8a;
+  border-right: 8px solid #1e3a8a;
+  border-radius: 10px; 
+  padding: 0;
+  position: relative;
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: #1e3a8a;
+  border-radius: 8px 8px 0 0;
+}
+
+.panel-content {
+  padding: 24px;
+  margin-top: 8px;
+}
+.label-jp { font-weight: 600; color: #333; display: block; margin-bottom: 4px; }
+.label-en { font-size: 13px; color: #666; display: block; margin-bottom: 8px; }
+
+/* Table look & feel - Japanese Standard */
+.table-styled { 
+  width: 100%; 
+  border-collapse: collapse; 
+  border: 2px solid #1e3a8a; 
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  background: white;
+}
+.table-styled th { 
+  background: #1e3a8a !important; 
+  color: #ffffff !important; 
+  text-align: center; 
+  font-weight: 600; 
+  padding: 12px 8px; 
+  border: 1px solid #1e3a8a; 
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+.table-styled td { 
+  background: #ffffff; 
+  padding: 8px; 
+  border: 1px solid #e2e8f0; 
+  vertical-align: middle;
+  min-height: 40px;
+}
+.table-styled tr:nth-child(even) td {
+  background: #f8fafc;
+}
+.table-styled tr:hover td {
+  background: #f1f5f9;
+}
+.table-header-blue th { background: #1e3a8a !important; color: #ffffff !important; }
+
+/* Ensure table headers are always visible */
+table.table-styled th,
+.table-styled th {
+  background: #1e3a8a !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+/* Upload dashed - Japanese Standard */
+.upload-dashed { 
+  border: 2px dashed #cbd5e1; 
+  border-radius: 12px; 
+  padding: 32px; 
+  text-align: center; 
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.upload-dashed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+.upload-dashed:hover { 
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #1e3a8a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.15);
+}
+.upload-dashed:hover::before {
+  left: 100%;
+}
+
+/* Yes/No line control - Japanese Standard */
+.yesno-line { 
+  display: flex; 
+  border: 2px solid #e2e8f0; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  width: fit-content; 
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+.yesno-line:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.yesno-line button { 
+  padding: 12px 24px; 
+  border: none; 
+  background: transparent; 
+  cursor: pointer; 
+  font-size: 15px; 
+  font-weight: 600;
+  color: #64748b;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+.yesno-line button:hover {
+  background: #f8fafc;
+  color: #1e3a8a;
+}
+.yesno-line button.active { 
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); 
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+}
+.yesno-line button + button { border-left: 1px solid #e2e8f0; }
+
+/* Form Header - Japanese Standard */
+.form-header {
+  margin-bottom: 48px;
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 16px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 8px 32px rgba(30, 58, 138, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%);
+}
+
+.form-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0 0 16px 0;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(30, 58, 138, 0.1);
+}
+
+.form-divider {
+  width: 120px;
+  height: 3px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%);
+  margin: 16px auto 24px auto;
+  border-radius: 2px;
+}
+
+.form-instruction {
+  text-align: center;
+  margin: 0 0 0 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-instruction-jp {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.form-instruction-en {
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 0 0;
+  letter-spacing: 0.3px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Go to top button */
+.go-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 64px;
+  height: 64px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.go-to-top:hover {
+  background: var(--color-background-tertiary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.go-to-top-icon {
+  font-size: 20px;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+.go-to-top-text {
+  font-size: 10px;
+  color: var(--color-primary);
+  margin-top: 2px;
+  line-height: 12px;
+  white-space: nowrap;
+}
+
+
+.app-bg-white {
+  background: white;
+  min-height: 100vh;
+}
+
+/* Header styles */
+.app-header {
+  background: #f8fafc;
+  border-bottom: 2px solid #1e3a8a;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.app-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e3a8a;
+}
+
+.app-preview-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e3a8a;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.app-preview-button:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.app-preview-icon {
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e3a8a;
+  font-size: 12px;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 60px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23e2e8f0" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23e2e8f0" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23e2e8f0" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="%23e2e8f0" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="%23e2e8f0" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+}
+
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0 0 24px 0;
+  line-height: 1.2;
+}
+
+.hero-title-main {
+  color: #1e3a8a;
+  display: block;
+}
+
+.hero-title-accent {
+  color: #059669;
+  display: block;
+  font-size: 36px;
+  margin-top: 8px;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  color: #475569;
+  margin: 0 0 12px 0;
+  line-height: 1.6;
+}
+
+.hero-subtitle-en {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+.hero-features {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.hero-feature-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.hero-feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.hero-feature-icon {
+  font-size: 24px;
+}
+
+.hero-feature-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-feature-text strong {
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hero-feature-text span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+
+/* Main Content */
+.main-content {
+  background: white;
+  padding: 60px 0;
+}
+
+.form-section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.form-header-info {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.form-header-info h2 {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin: 0 0 16px 0;
+}
+
+.form-header-info p {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+
+/* Footer */
+.footer {
+  background: #1e3a8a;
+  color: white;
+  padding: 20px 0;
+}
+
+.footer-bottom {
+  text-align: center;
+}
+
+.footer-bottom p {
+  font-size: 14px;
+  color: white;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content {
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 36px;
+  }
+  
+  .hero-title-accent {
+    font-size: 28px;
+  }
+  
+  .hero-features {
+    justify-content: center;
+  }
+  
+  .hero-feature-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  
+  
+  .app-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .app-logo {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 40px 0;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+  }
+  
+  .hero-title-accent {
+    font-size: 22px;
+  }
+  
+  .hero-features {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-feature-card {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .main-content {
+    padding: 40px 0;
+  }
+  
+  
+}
+
+/* Preview Modal */
+.preview-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.preview-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.preview-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.preview-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.preview-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.preview-modal-close:hover {
+  background: #e5e7eb;
+}
+
+.preview-modal-content {
+  padding: 24px;
+  max-height: calc(90vh - 80px);
+  overflow-y: auto;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-form-container {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.preview-form h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.preview-instruction {
+  text-align: center;
+  margin: 0 0 24px 0;
+}
+
+.preview-instruction-jp {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.preview-instruction-en {
+  font-size: 16px;
+  font-weight: bold;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.preview-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1e3a8a;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.preview-grid div {
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-grid strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.preview-photo {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.preview-addresses {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.preview-addresses div {
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-education-item,
+.preview-employment-item,
+.preview-jp-school-item,
+.preview-proficiency-item,
+.preview-family-item,
+.preview-family-jp-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 4px;
+}
+
+/* Photo upload frame */
+.photo-upload-frame {
+  width: 160px;
+  height: 120px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 16px 0;
+  overflow: hidden; /* Prevent image overflow */
+  position: relative;
+}
+
+.photo-upload-frame:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.photo-upload-content {
+  text-align: center;
+}
+
+.photo-upload-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.photo-upload-text {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.photo-upload-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.photo-upload-size {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Application Form Styles - Japanese Standard */
+.application-form {
+  width: 794px; /* A4 width in pixels (210mm at 96dpi) */
+  max-width: 794px;
+  margin: 0 auto;
+  padding: 60px 76px; /* Reduced top/bottom padding for better spacing */
+  background: white;
+  font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'MS Gothic', 'Helvetica', 'Arial', sans-serif;
+  line-height: 1.6;
+  color: #000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  min-height: 1123px; /* A4 height */
+}
+
+.application-form-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 3px solid #000;
+  padding-bottom: 25px;
+  position: relative;
+}
+
+.application-form-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: #000;
+}
+
+.form-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  color: #000;
+  letter-spacing: 1px;
+}
+
+.form-instruction {
+  font-size: 13px;
+  margin: 0;
+  color: #333;
+  line-height: 1.8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-section {
+  margin-bottom: 35px;
+  page-break-inside: avoid;
+  position: relative;
+}
+
+.section-header {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 12px;
+  position: relative;
+}
+
+.section-header::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: #000;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: #000;
+  letter-spacing: 0.5px;
+}
+
+.section-subtitle {
+  font-size: 11px;
+  margin: 0;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Personal Information Layout */
+.photo-section-top {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.subsection-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  color: #222;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.personal-info-basic,
+.personal-info-details,
+.personal-info-contact,
+.personal-info-passport {
+  margin-bottom: 20px;
+}
+
+.personal-info-basic .info-grid-2,
+.personal-info-contact .info-grid-2,
+.personal-info-passport .info-grid-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.personal-info-basic .info-grid-2 .info-row,
+.personal-info-contact .info-grid-2 .info-row,
+.personal-info-passport .info-grid-2 .info-row {
+  flex: 1;
+  min-width: 45%;
+}
+
+.personal-info-details .info-grid-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.personal-info-details .info-grid-3 .info-row {
+  flex: 1;
+  min-width: 30%;
+}
+
+/* Info Tables */
+.info-table {
+  margin-bottom: 15px;
+}
+
+.info-grid-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.info-grid-2 .info-row {
+  flex: 1;
+  min-width: 45%;
+}
+
+.info-grid-3 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.info-grid-3 .info-row {
+  flex: 1;
+  min-width: 30%;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 12px;
+  align-items: flex-start;
+  min-height: 24px;
+}
+
+.info-label {
+  font-weight: bold;
+  min-width: 140px;
+  margin-right: 15px;
+  font-size: 12px;
+  color: #000;
+  line-height: 1.5;
+}
+
+.info-value {
+  flex: 1;
+  font-size: 12px;
+  color: #333;
+  border-bottom: 1px solid #999;
+  padding-bottom: 4px;
+  min-height: 20px;
+  line-height: 1.5;
+}
+
+/* Data Tables - Japanese Standard */
+.data-table {
+  margin: 20px 0;
+  border: 2px solid #000;
+  font-size: 11px;
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.table-header {
+  display: flex;
+  background: #f0f0f0;
+  border-bottom: 2px solid #000;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1px solid #666;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:nth-child(even) {
+  background: #fafafa;
+}
+
+.table-cell {
+  padding: 10px 8px;
+  border-right: 1px solid #666;
+  word-wrap: break-word;
+  min-height: 24px;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.table-cell:last-child {
+  border-right: none;
+}
+
+.header-cell {
+  font-weight: bold;
+  background: #f0f0f0;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* Photo Section - Japanese Standard */
+.photo-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.photo-label {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #000;
+  letter-spacing: 0.5px;
+}
+
+.photo-container {
+  display: inline-block;
+  border: 2px solid #000;
+  padding: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.portrait-photo {
+  width: 120px;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid #ccc;
+}
+
+/* Address Section - Enhanced */
+.address-section {
+  margin-top: 25px;
+}
+
+.address-section .info-row {
+  margin-bottom: 18px;
+}
+
+.address-section .info-label {
+  min-width: 160px;
+}
+
+.address-section .info-value {
+  border-bottom: 2px solid #000;
+  min-height: 45px;
+  padding: 8px 0;
+  line-height: 1.6;
+}
+
+/* Employment Question */
+.employment-question,
+.family-japan-question {
+  margin-bottom: 15px;
+  font-size: 12px;
+}
+
+/* Proficiency Tests */
+.proficiency-test {
+  margin-bottom: 20px;
+}
+
+.test-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  color: #000;
+}
+
+.other-proficiency {
+  margin-top: 15px;
+  font-size: 11px;
+}
+
+/* Sponsor Section */
+.sponsor-address {
+  margin: 15px 0;
+  font-size: 12px;
+}
+
+.sponsor-address strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Plan Section */
+.plan-motivation,
+.reasons-content {
+  margin-bottom: 15px;
+  font-size: 12px;
+}
+
+.plan-motivation strong,
+.reasons-content strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.plan-others {
+  margin-top: 15px;
+  font-size: 12px;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 20px;
+  border: 1px dashed #ccc;
+  margin: 15px 0;
+}
+
+/* Duplicate print styles removed - using main print styles above */
+
+/* PDF Generation Styles */
+.pdf-generation .application-form {
+  width: 794px !important;
+  max-width: 794px !important;
+  margin: 0 !important;
+  padding: 76px !important;
+  background: white !important;
+  font-family: 'Times New Roman', serif !important;
+  line-height: 1.4 !important;
+  color: #000 !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+.pdf-generation .photo-section-top {
+  text-align: center !important;
+  margin-bottom: 25px !important;
+  padding: 15px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  background: #f9f9f9 !important;
+}
+
+.pdf-generation .subsection-title {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  margin: 0 0 12px 0 !important;
+  color: #333 !important;
+  border-bottom: 1px solid #eee !important;
+  padding-bottom: 5px !important;
+}
+
+.pdf-generation .personal-info-basic,
+.pdf-generation .personal-info-details,
+.pdf-generation .personal-info-contact,
+.pdf-generation .personal-info-passport {
+  margin-bottom: 20px !important;
+}
+
+.pdf-generation .personal-info-basic .info-grid-2,
+.pdf-generation .personal-info-contact .info-grid-2,
+.pdf-generation .personal-info-passport .info-grid-2 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+}
+
+.pdf-generation .personal-info-basic .info-grid-2 .info-row,
+.pdf-generation .personal-info-contact .info-grid-2 .info-row,
+.pdf-generation .personal-info-passport .info-grid-2 .info-row {
+  flex: 1 !important;
+  min-width: 45% !important;
+}
+
+.pdf-generation .personal-info-details .info-grid-3 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+}
+
+.pdf-generation .personal-info-details .info-grid-3 .info-row {
+  flex: 1 !important;
+  min-width: 30% !important;
+}
+
+.pdf-generation .info-grid-2 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+}
+
+.pdf-generation .info-grid-2 .info-row {
+  flex: 1 !important;
+  min-width: 45% !important;
+}
+
+.pdf-generation .info-grid-3 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 15px !important;
+}
+
+.pdf-generation .info-grid-3 .info-row {
+  flex: 1 !important;
+  min-width: 30% !important;
+}
+
+.pdf-generation .data-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.pdf-generation .table-header,
+.pdf-generation .table-row {
+  display: flex !important;
+}
+
+.pdf-generation .table-cell {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Success Screen Styles */
+.success-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.success-container {
+  background: white;
+  border-radius: 16px;
+  padding: 48px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: successFadeIn 0.6s ease-out;
+}
+
+@keyframes successFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  margin-bottom: 32px;
+}
+
+.success-checkmark {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 36px;
+  color: white;
+  font-weight: bold;
+  animation: checkmarkPulse 2s infinite;
+}
+
+@keyframes checkmarkPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.success-message {
+  margin-bottom: 40px;
+}
+
+.success-title {
+  margin-bottom: 24px;
+}
+
+.success-title-jp {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.success-title-en {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.success-description {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.success-description-jp,
+.success-description-en {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin-bottom: 16px;
+}
+
+.success-description-jp {
+  font-weight: 500;
+}
+
+.success-description-en {
+  font-weight: 400;
+}
+
+.success-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.success-actions .btn {
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.success-actions .btn-primary {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  color: white;
+}
+
+.success-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+}
+
+.success-actions .btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.success-actions .btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.btn-text-jp {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.success-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+}
+
+.success-footer-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.success-footer-jp {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.success-footer-en {
+  display: block;
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .success-container {
+    padding: 32px 24px;
+    margin: 16px;
+  }
+  
+  .success-title-jp {
+    font-size: 24px;
+  }
+  
+  .success-title-en {
+    font-size: 20px;
+  }
+  
+  .success-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .success-actions .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* Preview Page Styles */
+.preview-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-page-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 24px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.preview-page-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.preview-page-title {
+  margin: 0;
+}
+
+.preview-title-jp {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.preview-title-en {
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.preview-page-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.preview-page-actions .btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preview-page-actions .btn-primary {
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  color: white;
+}
+
+.preview-page-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #1e40af, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+}
+
+.preview-page-actions .btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+}
+
+.preview-page-actions .btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-page-content {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 794px; /* A4 width in pixels */
+  width: 100%;
+  min-height: 1123px; /* A4 height in pixels */
+  margin: 0 auto;
+}
+
+.preview-page-footer {
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.preview-page-footer .btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preview-page-footer .btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.preview-page-footer .btn-secondary:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.preview-error {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.preview-error-container {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.preview-error-container h2 {
+  color: #dc2626;
+  margin-bottom: 24px;
+}
+
+/* Duplicate print styles removed - using main print styles above */
+
+/* Personal Info with Photo Layout - Japanese Standard */
+.personal-info-with-photo {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.personal-info-fields {
+  flex: 1;
+}
+
+.name-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.name-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-section {
+  flex-shrink: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.photo-section .photo-upload-frame {
+  width: 120px;
+  height: 160px; /* 4:3 ratio for 4cm x 3cm */
+  border: 2px solid #000;
+  border-radius: 6px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.photo-section .photo-upload-frame:hover {
+  border-color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.photo-section .photo-upload-content {
+  text-align: center;
+  padding: 16px 8px;
+  color: #6b7280;
+}
+
+.photo-section .photo-upload-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.photo-section .photo-upload-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1e3a8a;
+}
+
+.photo-section .photo-upload-hint {
+  font-size: 10px;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.photo-section .photo-upload-size {
+  font-size: 10px;
+  font-weight: 500;
+  color: #1e3a8a;
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.photo-section img {
+  border-radius: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .preview-page-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .preview-page-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .preview-page-actions .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .preview-page-content {
+    padding: 16px;
+  }
+  
+  .preview-container {
+    padding: 16px;
+  }
+  
+  .preview-title-jp {
+    font-size: 20px;
+  }
+  
+  .preview-title-en {
+    font-size: 16px;
+  }
+  
+  /* Mobile layout for personal info */
+  .personal-info-with-photo {
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+  }
+  
+  .photo-section {
+    width: 100%;
+    align-items: center;
+  }
+  
+  .photo-section .photo-upload-frame {
+    width: 120px;
+    height: 160px;
+  }
+}
+
+/* Address Display Styles - Japanese Standard */
+.address-table {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.address-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.address-label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #000;
+  font-size: 13px;
+}
+
+.label-japanese {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000;
+  line-height: 1.4;
+}
+
+.label-english {
+  font-size: 10px;
+  font-weight: 400;
+  color: #666;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.address-value {
+  margin-left: 0;
+}
+
+.value-content {
+  font-size: 13px;
+  color: #000;
+  line-height: 1.6;
+  padding: 10px 0;
+  border-bottom: 2px solid #000;
+  min-height: 45px;
+}
+
+.address-japanese {
+  font-size: 13px;
+  color: #000;
+  font-weight: 500;
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.address-english {
+  font-size: 11px;
+  color: #666;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.name-japanese {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.name-english {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+/* Text Content Display Styles - Japanese Standard */
+.text-content-row {
+  margin-bottom: 20px;
+}
+
+.text-content-label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.text-content-value {
+  margin-left: 0;
+}
+
+.text-japanese {
+  font-size: 13px;
+  color: #000;
+  font-weight: 500;
+  line-height: 1.7;
+  margin-bottom: 10px;
+  padding: 15px;
+  background: white;
+  border: 2px solid #000;
+  border-radius: 4px;
+  min-height: 60px;
+}
+
+.text-english {
+  font-size: 11px;
+  color: #666;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 15px;
+  background: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 50px;
+}
+
+/* Info Row with Japanese/English Labels - Enhanced */
+.info-row-jp-en {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 15px;
+  min-height: 30px;
+}
+
+.info-label-jp-en {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  min-width: 160px;
+  margin-right: 15px;
+}
+
+.info-label-jp-en .label-japanese {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000;
+  line-height: 1.4;
+}
+
+.info-label-jp-en .label-english {
+  font-size: 10px;
+  font-weight: 400;
+  color: #666;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.info-value {
+  flex: 1;
+  border-bottom: 1px solid #999;
+  padding-bottom: 4px;
+  min-height: 20px;
+}
+
+.name-japanese {
+  font-size: 13px;
+  color: #000;
+  font-weight: 500;
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.name-english {
+  font-size: 11px;
+  color: #666;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Preview Page - Personal Info with Photo Layout - Japanese Standard */
+.personal-info-with-photo-preview {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.personal-info-fields-preview {
+  flex: 1;
+}
+
+.name-fields-grid-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.photo-section-preview {
+  flex-shrink: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.photo-frame-preview {
+  width: 120px;
+  height: 160px; /* 4:3 ratio for 4cm x 3cm */
+  border: 2px solid #000;
+  border-radius: 6px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.photo-placeholder {
+  text-align: center;
+  color: #666;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.photo-placeholder div:first-child {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Print styles for preview layout */
+@media print {
+  .personal-info-with-photo-preview {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    padding: 12px;
+    page-break-inside: avoid;
+  }
+  
+  .personal-info-fields-preview {
+    flex: 1;
+  }
+  
+  .name-fields-grid-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .photo-section-preview {
+    width: 100px;
+  }
+  
+  .photo-frame-preview {
+    width: 80px;
+    height: 107px;
+  }
+  
+  .photo-placeholder {
+    font-size: 8px;
+  }
+}
+
+/* Personal Info Grid Layout - Japanese Standard */
+.personal-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 35px;
+}
+
+.personal-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Photo Section Final */
+.photo-section-final {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.photo-frame-final {
+  width: 150px;
+  height: 200px; /* 4:3 ratio for 4cm x 3cm */
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.photo-placeholder-final {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.photo-placeholder-final .photo-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.photo-placeholder-final div:not(.photo-icon) {
+  margin-bottom: 4px;
+}
+
+.photo-placeholder-final div:last-child {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e3a8a;
+  background: #eff6ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Sponsor Section Styles - Japanese Standard */
+.sponsor-basic-info,
+.sponsor-address-section,
+.sponsor-contact-info,
+.sponsor-employment-info,
+.sponsor-financial-info {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.sponsor-address-section .address-table {
+  margin-top: 12px;
+}
+
+/* Academic Plan Section Styles - Japanese Standard */
+.plan-description,
+.educational-plan,
+.career-plan,
+.plan-additional {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.plan-content {
+  margin-top: 12px;
+}
+
+.plan-label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.plan-label .label-japanese {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.plan-label .label-english {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.plan-text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  min-height: 60px;
+}
+
+/* Print styles for new layout */
+@media print {
+  .personal-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .personal-info-column {
+    gap: 12px;
+  }
+  
+  .photo-section-final {
+    padding: 12px;
+    page-break-inside: avoid;
+  }
+  
+  .photo-frame-final {
+    width: 120px;
+    height: 160px;
+  }
+  
+  .photo-placeholder-final {
+    font-size: 10px;
+  }
+  
+  .photo-placeholder-final .photo-icon {
+    font-size: 20px;
+  }
+  
+  /* Print styles for sponsor sections */
+  .sponsor-basic-info,
+  .sponsor-address-section,
+  .sponsor-contact-info,
+  .sponsor-employment-info,
+  .sponsor-financial-info {
+    margin-bottom: 12px;
+    padding: 8px;
+    page-break-inside: avoid;
+  }
+  
+  /* Print styles for academic plan sections */
+  .plan-description,
+  .educational-plan,
+  .career-plan,
+  .plan-additional {
+    margin-bottom: 12px;
+    padding: 8px;
+    page-break-inside: avoid;
+  }
+  
+  .plan-text {
+    font-size: 11px;
+    padding: 8px;
+    min-height: 40px;
+  }
+  
+  .plan-label .label-japanese {
+    font-size: 11px;
+  }
+  
+  .plan-label .label-english {
+    font-size: 10px;
+  }
+}
+

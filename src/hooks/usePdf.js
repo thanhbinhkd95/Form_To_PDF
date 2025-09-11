@@ -1,0 +1,42 @@
+import { useCallback } from 'react'
+import { useFormContext } from '../context/useFormContext.js'
+import { generatePdf, generatePdfFromData } from '../utils/pdfGenerator.js'
+
+export function usePdf() {
+  const { state, dispatch } = useFormContext()
+
+  const generatePdfFromPreview = useCallback(async () => {
+    try {
+      dispatch({ type: 'SET_STATUS', payload: { generatingPdf: true } })
+      const blob = await generatePdf()
+      dispatch({ type: 'SET_PDF', payload: blob })
+      return blob
+    } finally {
+      dispatch({ type: 'SET_STATUS', payload: { generatingPdf: false } })
+    }
+  }, [dispatch])
+
+  const generatePdfFromFormData = useCallback(async (formData, imageUrl) => {
+    try {
+      dispatch({ type: 'SET_STATUS', payload: { generatingPdf: true } })
+      const blob = await generatePdfFromData(formData, imageUrl)
+      dispatch({ type: 'SET_PDF', payload: blob })
+      return blob
+    } finally {
+      dispatch({ type: 'SET_STATUS', payload: { generatingPdf: false } })
+    }
+  }, [dispatch])
+
+  // Alias cho backward compatibility
+  const generate = generatePdfFromPreview
+
+  return { 
+    pdfBlob: state.pdfBlob, 
+    generate, 
+    generatePdfFromPreview,
+    generatePdfFromFormData,
+    generating: state.status.generatingPdf 
+  }
+}
+
+
