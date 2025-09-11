@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from '../hooks/useForm.js'
 import { usePdf } from '../hooks/usePdf.js'
 import { useEmail } from '../hooks/useEmail.js'
@@ -15,6 +15,37 @@ export default function PreviewPage() {
   const [progress, setProgress] = useState({ message: '', percentage: 0 })
   const [showSuccess, setShowSuccess] = useState(false)
   const [successInfo, setSuccessInfo] = useState({ filename: '', size: 0 })
+  
+  // State cho scroll behavior
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  // Scroll detection effect
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // Nếu scroll xuống quá 100px thì ẩn header
+      if (currentScrollY > 100) {
+        // Chỉ ẩn khi scroll xuống, không ẩn khi scroll lên
+        if (currentScrollY > lastScrollY && currentScrollY > 200) {
+          setIsHeaderVisible(false)
+        }
+        // Hiện lại khi scroll lên
+        else if (currentScrollY < lastScrollY) {
+          setIsHeaderVisible(true)
+        }
+      } else {
+        // Luôn hiện header khi ở gần đầu trang
+        setIsHeaderVisible(true)
+      }
+      
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [lastScrollY])
 
   if (!submittedData) {
     return (
@@ -147,7 +178,7 @@ export default function PreviewPage() {
 
   return (
     <div className="preview-page">
-      <div className="preview-page-header">
+      <div className={`preview-page-header ${!isHeaderVisible ? 'header-hidden' : ''}`}>
         <div className="preview-page-header-content">
           <h1 className="preview-page-title">
             <span className="preview-title-jp">提出済み申請書の確認</span>
@@ -264,6 +295,17 @@ export default function PreviewPage() {
         </button>
       </div>
 
+      {/* Floating action button để hiện lại header */}
+      {!isHeaderVisible && (
+        <button 
+          className="floating-action-btn show"
+          onClick={() => setIsHeaderVisible(true)}
+          title="Show actions"
+        >
+          📋 Actions
+        </button>
+      )}
+
       <style>{`
         .progress-overlay {
           position: fixed;
@@ -340,28 +382,86 @@ export default function PreviewPage() {
         }
 
         .preview-page-actions {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
           gap: 12px;
-          justify-content: center;
-          align-items: center;
-          margin-top: 20px;
+          max-width: 900px;
+          margin: 20px auto 0;
         }
 
         .preview-page-actions .btn {
-          flex: 1;
-          min-width: 200px;
-          max-width: 250px;
+          width: 100%;
+          min-height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Header hide/show animation */
+        .preview-page-header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+          transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+          transform: translateY(0);
+          opacity: 1;
+        }
+
+        .preview-page-header.header-hidden {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+
+        /* Floating action button for mobile */
+        .floating-action-btn {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 200;
+          background: linear-gradient(135deg, #1e3a8a, #1e40af);
+          color: white;
+          border: none;
+          border-radius: 50px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+          transition: all 0.3s ease;
+          display: none;
+        }
+
+        .floating-action-btn:hover {
+          background: linear-gradient(135deg, #1e40af, #1d4ed8);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(30, 58, 138, 0.4);
         }
 
         @media (max-width: 768px) {
           .preview-page-actions {
-            flex-direction: column;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            max-width: none;
+            margin: 20px 0 0;
           }
           
           .preview-page-actions .btn {
-            width: 100%;
-            max-width: none;
+            min-height: 44px;
+          }
+
+          /* Show floating button on mobile when header is hidden */
+          .preview-page-header.header-hidden + * .floating-action-btn,
+          .floating-action-btn.show {
+            display: block;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .preview-page-actions {
+            grid-template-columns: 1fr;
+            gap: 8px;
           }
         }
       `}</style>
