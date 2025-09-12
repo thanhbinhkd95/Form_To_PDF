@@ -1,83 +1,87 @@
-import { useState, useEffect } from 'react'
-import { useForm } from '../hooks/useForm.js'
-import { usePdf } from '../hooks/usePdf.js'
-import { sendEmail } from '../utils/emailService.js'
-import { createAndDownloadPackage, showSaveDialog, downloadPackage } from '../utils/packageDownloader.js'
-import Preview from './Preview.jsx'
-import { AlertDialog } from './SharedDialog.jsx'
+import { useState, useEffect } from "react";
+import { useForm } from "../../hooks/useForm.js";
+import { usePdf } from "../../hooks/usePdf.js";
+import { sendEmail } from "../../utils/emailService.js";
+import {
+  createAndDownloadPackage,
+  showSaveDialog,
+  downloadPackage,
+} from "../../utils/packageDownloader.js";
+import Preview from "./Preview.jsx";
+import { AlertDialog } from "../shared/SharedDialog.jsx";
 
 export default function PreviewPage() {
-  const { submittedData, resetToForm } = useForm()
-  const { generatePdfFromFormData } = usePdf()
-  
+  const { submittedData, resetToForm } = useForm();
+  const { generatePdfFromFormData } = usePdf();
+
   // Dialog states
-  const [alertDialog, setAlertDialog] = useState({ 
-    isOpen: false, 
-    title: '', 
-    message: '', 
-    type: 'info' 
-  })
+  const [alertDialog, setAlertDialog] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
 
   // Helper function to show alert
-  const showAlert = (title, message, type = 'info') => {
-    setAlertDialog({ isOpen: true, title, message, type })
-  }
+  const showAlert = (title, message, type = "info") => {
+    setAlertDialog({ isOpen: true, title, message, type });
+  };
 
   const closeAlert = () => {
-    setAlertDialog({ isOpen: false, title: '', message: '', type: 'info' })
-  }
-  
+    setAlertDialog({ isOpen: false, title: "", message: "", type: "info" });
+  };
+
   // State cho progress indicator
-  const [isCreatingPackage, setIsCreatingPackage] = useState(false)
-  const [progress, setProgress] = useState({ message: '', percentage: 0 })
-  const [showSuccess, setShowSuccess] = useState(false)
-  const [successInfo, setSuccessInfo] = useState({ filename: '', size: 0 })
-  
+  const [isCreatingPackage, setIsCreatingPackage] = useState(false);
+  const [progress, setProgress] = useState({ message: "", percentage: 0 });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successInfo, setSuccessInfo] = useState({ filename: "", size: 0 });
+
   // State cho email form
   const [emailForm, setEmailForm] = useState({
-    recipientEmail: '',
-    showEmailForm: false
-  })
-  
+    recipientEmail: "",
+    showEmailForm: false,
+  });
+
   // Reset email form khi component mount để đảm bảo không có giá trị cũ
   useEffect(() => {
     setEmailForm({
-      recipientEmail: '',
-      showEmailForm: false
-    })
-  }, [])
-  const [isSendingEmail, setIsSendingEmail] = useState(false)
-  
+      recipientEmail: "",
+      showEmailForm: false,
+    });
+  }, []);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
   // State cho scroll behavior
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Scroll detection effect
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      
+      const currentScrollY = window.scrollY;
+
       // Nếu scroll xuống quá 100px thì ẩn header
       if (currentScrollY > 100) {
         // Chỉ ẩn khi scroll xuống, không ẩn khi scroll lên
         if (currentScrollY > lastScrollY && currentScrollY > 200) {
-          setIsHeaderVisible(false)
+          setIsHeaderVisible(false);
         }
         // Hiện lại khi scroll lên
         else if (currentScrollY < lastScrollY) {
-          setIsHeaderVisible(true)
+          setIsHeaderVisible(true);
         }
       } else {
         // Luôn hiện header khi ở gần đầu trang
-        setIsHeaderVisible(true)
+        setIsHeaderVisible(true);
       }
-      
-      setLastScrollY(currentScrollY)
-    }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY])
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   if (!submittedData) {
     return (
@@ -89,170 +93,178 @@ export default function PreviewPage() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   const handleDownloadPdf = async () => {
     try {
-      setIsCreatingPackage(true)
-      setProgress({ message: 'Preparing...', percentage: 0 })
-      
-      console.log('Starting PDF download creation...')
-      
+      setIsCreatingPackage(true);
+      setProgress({ message: "Preparing...", percentage: 0 });
+
+      console.log("Starting PDF download creation...");
+
       // 1. Hiển thị dialog chọn nơi lưu file
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')
-      const defaultFilename = `Application_Form_${timestamp}.pdf`
-      
-      setProgress({ message: 'Preparing...', percentage: 0 })
-      
-      const selectedFilename = await showSaveDialog(defaultFilename)
-      
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[:-]/g, "");
+      const defaultFilename = `Application_Form_${timestamp}.pdf`;
+
+      setProgress({ message: "Preparing...", percentage: 0 });
+
+      const selectedFilename = await showSaveDialog(defaultFilename);
+
       if (!selectedFilename) {
         return {
           success: false,
-          message: 'User cancelled file save operation',
-          cancelled: true
-        }
+          message: "User cancelled file save operation",
+          cancelled: true,
+        };
       }
-      
+
       // 2. Tạo PDF với progress updates
-      console.log('Creating PDF...')
-      setProgress({ message: 'Creating PDF...', percentage: 20 })
-      
-      const pdfBlob = await generatePdfFromFormData(submittedData, submittedData.imageUrl)
-      
+      console.log("Creating PDF...");
+      setProgress({ message: "Creating PDF...", percentage: 20 });
+
+      const pdfBlob = await generatePdfFromFormData(
+        submittedData,
+        submittedData.imageUrl
+      );
+
       if (!pdfBlob || pdfBlob.size === 0) {
-        throw new Error('Generated PDF is invalid')
+        throw new Error("Generated PDF is invalid");
       }
-      
+
       // 3. Download PDF
-      console.log('Downloading PDF...')
-      setProgress({ message: 'Downloading...', percentage: 95 })
-      
-      downloadPackage(pdfBlob, selectedFilename)
-      
-      setProgress({ message: 'Completed!', percentage: 100 })
-      
-      setSuccessInfo({ filename: selectedFilename, size: pdfBlob.size })
-      setShowSuccess(true)
-      
+      console.log("Downloading PDF...");
+      setProgress({ message: "Downloading...", percentage: 95 });
+
+      downloadPackage(pdfBlob, selectedFilename);
+
+      setProgress({ message: "Completed!", percentage: 100 });
+
+      setSuccessInfo({ filename: selectedFilename, size: pdfBlob.size });
+      setShowSuccess(true);
+
       // Tự động đóng modal sau 3 giây
       setTimeout(() => {
-        setShowSuccess(false)
-        setIsCreatingPackage(false)
-        setProgress({ message: '', percentage: 0 })
-      }, 3000)
-      
+        setShowSuccess(false);
+        setIsCreatingPackage(false);
+        setProgress({ message: "", percentage: 0 });
+      }, 3000);
     } catch (error) {
-      console.error('Error creating PDF:', error)
+      console.error("Error creating PDF:", error);
       showAlert(
-        'PDF作成エラー / PDF Creation Error',
-        `PDFの作成中にエラーが発生しました / Error creating PDF.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`,
-        'error'
-      )
+        "PDF作成エラー / PDF Creation Error",
+        `PDFの作成中にエラーが発生しました / Error creating PDF.\n\nError details: ${error.message || "Unknown error"}\n\nPlease try again.`,
+        "error"
+      );
     } finally {
       if (!showSuccess) {
-        setIsCreatingPackage(false)
-        setProgress({ message: '', percentage: 0 })
+        setIsCreatingPackage(false);
+        setProgress({ message: "", percentage: 0 });
       }
     }
-  }
+  };
 
   const handleDownloadPackage = async () => {
     try {
-      setIsCreatingPackage(true)
-      setProgress({ message: 'Preparing...', percentage: 0 })
-      
-      console.log('Starting package download creation...')
+      setIsCreatingPackage(true);
+      setProgress({ message: "Preparing...", percentage: 0 });
+
+      console.log("Starting package download creation...");
       const result = await createAndDownloadPackage(
-        submittedData, 
+        submittedData,
         submittedData.imageUrl,
         (message, percentage) => {
-          setProgress({ message, percentage })
+          setProgress({ message, percentage });
         }
-      )
-      
+      );
+
       if (result.success) {
-        setSuccessInfo({ filename: result.filename, size: result.size })
-        setShowSuccess(true)
+        setSuccessInfo({ filename: result.filename, size: result.size });
+        setShowSuccess(true);
         // Auto close modal after 3 seconds
         setTimeout(() => {
-          setShowSuccess(false)
-          setIsCreatingPackage(false)
-          setProgress({ message: '', percentage: 0 })
-        }, 3000)
+          setShowSuccess(false);
+          setIsCreatingPackage(false);
+          setProgress({ message: "", percentage: 0 });
+        }, 3000);
       } else if (result.cancelled) {
         // User cancelled, don't show notification
       } else {
-        console.error('Package creation failed:', result.error)
+        console.error("Package creation failed:", result.error);
         showAlert(
-          'パッケージ作成エラー / Package Creation Error',
-          `${result.message}\n\nError details: ${result.error?.message || 'Unknown error'}`,
-          'error'
-        )
+          "パッケージ作成エラー / Package Creation Error",
+          `${result.message}\n\nError details: ${result.error?.message || "Unknown error"}`,
+          "error"
+        );
       }
     } catch (error) {
-      console.error('Error creating package:', error)
+      console.error("Error creating package:", error);
       showAlert(
-        'パッケージ作成エラー / Package Creation Error',
-        `パッケージの作成中にエラーが発生しました / Error creating package.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`,
-        'error'
-      )
+        "パッケージ作成エラー / Package Creation Error",
+        `パッケージの作成中にエラーが発生しました / Error creating package.\n\nError details: ${error.message || "Unknown error"}\n\nPlease try again.`,
+        "error"
+      );
     } finally {
       if (!showSuccess) {
-        setIsCreatingPackage(false)
-        setProgress({ message: '', percentage: 0 })
+        setIsCreatingPackage(false);
+        setProgress({ message: "", percentage: 0 });
       }
     }
-  }
+  };
 
   const handlePrint = () => {
-    window.print()
-  }
+    window.print();
+  };
 
   const handleSendEmail = async () => {
     // Hiển thị form nhập email
-    setEmailForm({ ...emailForm, showEmailForm: true })
-  }
+    setEmailForm({ ...emailForm, showEmailForm: true });
+  };
 
   const handleSendEmailConfirm = async () => {
     if (!emailForm.recipientEmail) {
       showAlert(
-        'メールアドレス入力エラー / Email Address Error',
-        '受信者のメールアドレスを入力してください / Please enter recipient email address',
-        'warning'
-      )
-      return
+        "メールアドレス入力エラー / Email Address Error",
+        "受信者のメールアドレスを入力してください / Please enter recipient email address",
+        "warning"
+      );
+      return;
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailForm.recipientEmail)) {
       showAlert(
-        'メールアドレス形式エラー / Invalid Email Format',
-        '正しいメールアドレス形式を入力してください / Invalid email address',
-        'warning'
-      )
-      return
+        "メールアドレス形式エラー / Invalid Email Format",
+        "正しいメールアドレス形式を入力してください / Invalid email address",
+        "warning"
+      );
+      return;
     }
 
     try {
-      setIsSendingEmail(true)
-      
+      setIsSendingEmail(true);
+
       // Tạo PDF trước
-      console.log('Creating PDF for email...')
-      const pdfBlob = await generatePdfFromFormData(submittedData, submittedData.imageUrl)
-      
+      console.log("Creating PDF for email...");
+      const pdfBlob = await generatePdfFromFormData(
+        submittedData,
+        submittedData.imageUrl
+      );
+
       // Tạo download link cho PDF
-      const pdfUrl = URL.createObjectURL(pdfBlob)
-      const fileName = `Application_Form_${new Date().toISOString().slice(0, 10)}.pdf`
-      
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const fileName = `Application_Form_${new Date().toISOString().slice(0, 10)}.pdf`;
+
       // Gửi email với PDF download link
-      console.log('Sending email with PDF download link...')
+      console.log("Sending email with PDF download link...");
       await sendEmail({
         to: emailForm.recipientEmail,
-        subject: '申請書の送信完了 / Application Form Submission Complete',
-        text: `こんにちは ${emailForm.recipientEmail.split('@')[0]} 様,
+        subject: "申請書の送信完了 / Application Form Submission Complete",
+        text: `こんにちは ${emailForm.recipientEmail.split("@")[0]} 様,
 
 申請書のPDFファイルが正常に作成されました。
 PDFファイルは下記のリンクからダウンロードできます。
@@ -264,7 +276,7 @@ Please download the PDF file using the link below.
 Best regards,
 Application Form System`,
         html: `
-          <p>こんにちは <strong>${emailForm.recipientEmail.split('@')[0]}</strong> 様,</p>
+          <p>こんにちは <strong>${emailForm.recipientEmail.split("@")[0]}</strong> 様,</p>
           <p>申請書のPDFファイルが正常に作成されました。</p>
           <p>PDFファイルは下記のリンクからダウンロードできます。</p>
           <br>
@@ -274,86 +286,94 @@ Application Form System`,
           <br>
           <p>Best regards,<br>Application Form System</p>
         `,
-        attachments: [{ 
-          filename: fileName, 
-          blob: pdfBlob 
-        }]
-      })
-      
+        attachments: [
+          {
+            filename: fileName,
+            blob: pdfBlob,
+          },
+        ],
+      });
+
       // Cleanup URL object
-      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000)
-      
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+
       showAlert(
-        'メール送信完了 / Email Sent Successfully',
-        'メールが正常に送信されました / Email sent successfully!',
-        'success'
-      )
-      setEmailForm({ recipientEmail: '', showEmailForm: false })
+        "メール送信完了 / Email Sent Successfully",
+        "メールが正常に送信されました / Email sent successfully!",
+        "success"
+      );
+      setEmailForm({ recipientEmail: "", showEmailForm: false });
     } catch (error) {
-      console.error('Error sending email:', error)
+      console.error("Error sending email:", error);
       showAlert(
-        'メール送信エラー / Email Sending Failed',
+        "メール送信エラー / Email Sending Failed",
         `メールの送信に失敗しました / Failed to send email: ${error.message}`,
-        'error'
-      )
+        "error"
+      );
     } finally {
-      setIsSendingEmail(false)
+      setIsSendingEmail(false);
     }
-  }
+  };
 
   const handleCancelEmail = () => {
-    setEmailForm({ recipientEmail: '', showEmailForm: false })
-  }
+    setEmailForm({ recipientEmail: "", showEmailForm: false });
+  };
 
   return (
     <div className="preview-page">
-      <div className={`preview-page-header ${!isHeaderVisible ? 'header-hidden' : ''}`}>
+      <div
+        className={`preview-page-header ${!isHeaderVisible ? "header-hidden" : ""}`}
+      >
         <div className="preview-page-header-content">
           <h1 className="preview-page-title">
             <span className="preview-title-jp">提出済み申請書の確認</span>
-            <span className="preview-title-en">Review Submitted Application</span>
+            <span className="preview-title-en">
+              Review Submitted Application
+            </span>
           </h1>
-          
+
           <div className="preview-page-actions">
-            <button 
-              className="btn btn-primary" 
-              onClick={resetToForm}
-            >
-              <span className="btn-text-jp">新しい申請書を作成 / Create New Application</span>
+            <button className="btn btn-primary" onClick={resetToForm}>
+              <span className="btn-text-jp">
+                新しい申請書を作成 / Create New Application
+              </span>
             </button>
-            
-            <button 
-              className="btn btn-primary" 
+
+            <button
+              className="btn btn-primary"
               onClick={handleDownloadPackage}
               disabled={isCreatingPackage}
             >
               <span className="btn-text-jp">
-                {isCreatingPackage ? '⏳ Creating Package...' : '📦 パッケージダウンロード / Download Package'}
+                {isCreatingPackage
+                  ? "⏳ Creating Package..."
+                  : "📦 パッケージダウンロード / Download Package"}
               </span>
             </button>
-            
-            <button 
-              className="btn btn-primary" 
+
+            <button
+              className="btn btn-primary"
               onClick={handleDownloadPdf}
               disabled={isCreatingPackage}
             >
-              <span className="btn-text-jp">📄 PDFダウンロード / Download PDF Only</span>
+              <span className="btn-text-jp">
+                📄 PDFダウンロード / Download PDF Only
+              </span>
             </button>
-            
-            <button 
-              className="btn btn-primary" 
-              onClick={handlePrint}
-            >
+
+            <button className="btn btn-primary" onClick={handlePrint}>
               <span className="btn-text-jp">印刷 / Print</span>
             </button>
-            
-            <button 
-              className="btn btn-primary" 
+
+            <button
+              className="btn btn-primary"
               onClick={handleSendEmail}
               disabled={isSendingEmail}
             >
               <span className="btn-text-jp">
-                {isSendingEmail ? '⏳ 送信中... / Sending...' : '📧 メール送信 / Send Email'}
+                {isSendingEmail
+                  ? "⏳ 送信中... / Sending..."
+                  : "📧 メール送信 / Send Email"}
               </span>
             </button>
           </div>
@@ -369,13 +389,12 @@ Application Form System`,
                 // Success state
                 <>
                   <div className="progress-header">
-                    <h3 style={{ color: '#059669' }}>✅ Success!</h3>
+                    <h3 style={{ color: "#059669" }}>✅ Success!</h3>
                   </div>
                   <div className="progress-success">
-                    {successInfo.filename.endsWith('.zip') 
-                      ? 'Package has been created and downloaded successfully!'
-                      : 'PDF has been created and downloaded successfully!'
-                    }
+                    {successInfo.filename.endsWith(".zip")
+                      ? "Package has been created and downloaded successfully!"
+                      : "PDF has been created and downloaded successfully!"}
                   </div>
                   <div className="progress-details">
                     📁 File: {successInfo.filename}
@@ -383,7 +402,10 @@ Application Form System`,
                   <div className="progress-details">
                     📊 Size: {(successInfo.size / 1024 / 1024).toFixed(2)} MB
                   </div>
-                  <div className="progress-details" style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
+                  <div
+                    className="progress-details"
+                    style={{ marginTop: "1rem", fontSize: "0.8rem" }}
+                  >
                     This dialog will close automatically in 3 seconds...
                   </div>
                 </>
@@ -392,21 +414,18 @@ Application Form System`,
                 <>
                   <div className="progress-header">
                     <h3>
-                      {progress.message.includes('PDF') 
-                        ? 'Creating PDF...' 
-                        : 'Creating Package...'
-                      }
+                      {progress.message.includes("PDF")
+                        ? "Creating PDF..."
+                        : "Creating Package..."}
                     </h3>
                   </div>
                   <div className="progress-bar">
-                    <div 
-                      className="progress-fill" 
+                    <div
+                      className="progress-fill"
                       style={{ width: `${progress.percentage}%` }}
                     ></div>
                   </div>
-                  <div className="progress-message">
-                    {progress.message}
-                  </div>
+                  <div className="progress-message">{progress.message}</div>
                   <div className="progress-percentage">
                     {Math.round(progress.percentage)}%
                   </div>
@@ -415,7 +434,7 @@ Application Form System`,
             </div>
           </div>
         )}
-        
+
         <div className="preview-container">
           <Preview data={submittedData} imageUrl={submittedData.imageUrl} />
         </div>
@@ -433,52 +452,62 @@ Application Form System`,
           <div className="email-modal">
             <div className="email-modal-header">
               <h3>📧 メール送信 / Send Email</h3>
-              <button 
-                className="email-modal-close"
-                onClick={handleCancelEmail}
-              >
+              <button className="email-modal-close" onClick={handleCancelEmail}>
                 ×
               </button>
             </div>
-            
+
             <div className="email-modal-content">
               <div className="email-input-group">
                 <label htmlFor="recipient-email">
-                  <span className="label-jp">受信者メールアドレス / Recipient Email</span>
+                  <span className="label-jp">
+                    受信者メールアドレス / Recipient Email
+                  </span>
                 </label>
                 <input
                   id="recipient-email"
                   type="email"
                   placeholder="example@email.com"
                   value={emailForm.recipientEmail}
-                  onChange={(e) => setEmailForm({...emailForm, recipientEmail: e.target.value})}
+                  onChange={(e) =>
+                    setEmailForm({
+                      ...emailForm,
+                      recipientEmail: e.target.value,
+                    })
+                  }
                   disabled={isSendingEmail}
                 />
               </div>
-              
+
               <div className="email-info">
                 <p className="email-info-text">
-                  <span className="info-jp">申請書のPDFファイルが自動的に添付されます。</span>
-                  <span className="info-en">Application form PDF will be automatically attached.</span>
+                  <span className="info-jp">
+                    申請書のPDFファイルが自動的に添付されます。
+                  </span>
+                  <span className="info-en">
+                    Application form PDF will be automatically attached.
+                  </span>
                 </p>
               </div>
             </div>
-            
+
             <div className="email-modal-actions">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={handleCancelEmail}
                 disabled={isSendingEmail}
               >
                 <span className="btn-text-jp">キャンセル / Cancel</span>
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleSendEmailConfirm}
                 disabled={isSendingEmail || !emailForm.recipientEmail}
               >
                 <span className="btn-text-jp">
-                  {isSendingEmail ? '⏳ 送信中... / Sending...' : '📧 送信 / Send'}
+                  {isSendingEmail
+                    ? "⏳ 送信中... / Sending..."
+                    : "📧 送信 / Send"}
                 </span>
               </button>
             </div>
@@ -488,7 +517,7 @@ Application Form System`,
 
       {/* Floating action button để hiện lại header */}
       {!isHeaderVisible && (
-        <button 
+        <button
           className="floating-action-btn show"
           onClick={() => setIsHeaderVisible(true)}
           title="Show actions"
@@ -826,5 +855,5 @@ Application Form System`,
         type={alertDialog.type}
       />
     </div>
-  )
+  );
 }
