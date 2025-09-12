@@ -1,28 +1,41 @@
 import emailjs from '@emailjs/browser'
 import { uploadPdfToStorage } from './firebaseStorage.js'
 
-// Cấu hình EmailJS với thông tin của bạn
+// Cấu hình EmailJS chỉ từ biến môi trường (không dùng giá trị mặc định)
 const EMAILJS_CONFIG = {
-  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_xt3712r',
-  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_kn6moqh', 
-  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '519ktkUCZCirkhD7f'
+  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+}
+
+// Validate cấu hình bắt buộc
+if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
+  const missing = [
+    !EMAILJS_CONFIG.serviceId ? 'VITE_EMAILJS_SERVICE_ID' : null,
+    !EMAILJS_CONFIG.templateId ? 'VITE_EMAILJS_TEMPLATE_ID' : null,
+    !EMAILJS_CONFIG.publicKey ? 'VITE_EMAILJS_PUBLIC_KEY' : null,
+  ].filter(Boolean).join(', ')
+  throw new Error(`Missing EmailJS environment variables: ${missing}`)
 }
 
 // Khởi tạo EmailJS
 emailjs.init(EMAILJS_CONFIG.publicKey)
 
 
+
 export async function sendEmail({ to, subject, text, html, attachments = [] }) {
   try {
     console.log('Sending email with EmailJS...', { to, subject, attachmentsCount: attachments.length })
     
-    // Template parameters cho EmailJS
+    // Template parameters cho EmailJS - đơn giản hóa để tránh lỗi variables
     const templateParams = {
       to_email: to,
-      user_name: to.split('@')[0], // Tên người dùng từ email
+      to_name: to.split('@')[0],
+      user_name: to.split('@')[0], // Thêm user_name cho template
       subject: subject,
       message: text || html,
-      from_name: 'Application Form System'
+      from_name: 'Application Form System',
+      pdf_download_url: '' // Sẽ được set khi có PDF
     }
 
     // Xử lý PDF attachment nếu có
@@ -37,36 +50,24 @@ export async function sendEmail({ to, subject, text, html, attachments = [] }) {
         type: pdfBlob.type 
       })
 
-      // Upload PDF to Firebase Storage
+      // Upload PDF to Firebase Storage (bắt buộc thành công để gửi email)
       console.log('Uploading PDF to Firebase Storage...')
       const downloadURL = await uploadPdfToStorage(pdfBlob, filename)
       
-      // Thêm PDF info vào template params
+      // Thêm PDF download URL vào template parameters
+      templateParams.pdf_download_url = downloadURL
       templateParams.pdf_filename = filename
       templateParams.pdf_size_kb = Math.round(pdfBlob.size / 1024)
-      templateParams.pdf_download_url = downloadURL
-      templateParams.has_attachment = 'Yes'
-      
-      // Tạo HTML download link
-      templateParams.pdf_download_link = `
-        <div style="background-color: #f0f9ff; padding: 20px; border: 2px solid #0ea5e9; border-radius: 8px; margin: 20px 0; text-align: center;">
-          <h3 style="margin-top: 0; color: #0369a1;">📄 Your Application Form PDF</h3>
-          <p style="margin-bottom: 15px;"><strong>File:</strong> ${filename}</p>
-          <p style="margin-bottom: 15px;"><strong>Size:</strong> ${Math.round(pdfBlob.size / 1024)} KB</p>
-          <a href="${downloadURL}" target="_blank" 
-             style="display: inline-block; background-color: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-            📥 Download PDF
-          </a>
-          <p style="margin-top: 15px; font-size: 12px; color: #666;">
-            Click the button above to download your application form PDF from Firebase Storage
-          </p>
-        </div>
-      `
-    } else {
-      templateParams.has_attachment = 'No'
-      templateParams.pdf_download_link = ''
     }
 
+    // Debug: Log template parameters
+    console.log('EmailJS Template Parameters:', templateParams)
+    console.log('EmailJS Config:', {
+      serviceId: EMAILJS_CONFIG.serviceId,
+      templateId: EMAILJS_CONFIG.templateId,
+      publicKey: EMAILJS_CONFIG.publicKey?.substring(0, 10) + '...'
+    })
+    
     // Gửi email qua EmailJS
     const response = await emailjs.send(
       EMAILJS_CONFIG.serviceId,

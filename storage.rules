@@ -1,12 +1,12 @@
 rules_version = '2';
 
-// Firebase Storage rules for application forms
+// Firebase Storage rules for application forms (simplified for testing)
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow public read access to application forms
+    // Allow public access to application forms (for development)
     match /application-forms/{fileName} {
-      allow read: if true;
-      allow write: if true; // Allow upload for development
+      // Allow all operations for testing
+      allow read, write: if true;
     }
     
     // Block all other paths

@@ -47,3 +47,4 @@ export const APP_CONSTANTS = {
     EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
 }
+

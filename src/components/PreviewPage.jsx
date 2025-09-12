@@ -20,6 +20,14 @@ export default function PreviewPage() {
     recipientEmail: '',
     showEmailForm: false
   })
+  
+  // Reset email form khi component mount để đảm bảo không có giá trị cũ
+  useEffect(() => {
+    setEmailForm({
+      recipientEmail: '',
+      showEmailForm: false
+    })
+  }, [])
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   
   // State cho scroll behavior
@@ -205,17 +213,27 @@ export default function PreviewPage() {
       console.log('Sending email with PDF download link...')
       await sendEmail({
         to: emailForm.recipientEmail,
-        subject: '申請書の送信完了 / Application Form Submission',
-        text: `Xin chào ${emailForm.recipientEmail.split('@')[0]},\n\nĐây là bản PDF của form đăng ký của bạn.\n\nVui lòng truy cập ứng dụng để tải xuống PDF.\n\nThank you for your application.`,
+        subject: '申請書の送信完了 / Application Form Submission Complete',
+        text: `こんにちは ${emailForm.recipientEmail.split('@')[0]} 様,
+
+申請書のPDFファイルが正常に作成されました。
+PDFファイルは下記のリンクからダウンロードできます。
+
+Thank you for your application.
+Your application form PDF has been successfully created.
+Please download the PDF file using the link below.
+
+Best regards,
+Application Form System`,
         html: `
-          <p>Xin chào <strong>${emailForm.recipientEmail.split('@')[0]}</strong>,</p>
-          <p>Đây là bản PDF của form đăng ký của bạn.</p>
-          <p><strong>Để tải xuống PDF:</strong></p>
-          <ol>
-            <li>Truy cập ứng dụng: <a href="${window.location.origin}">${window.location.origin}</a></li>
-            <li>Điền lại form hoặc sử dụng chức năng "Download PDF"</li>
-          </ol>
+          <p>こんにちは <strong>${emailForm.recipientEmail.split('@')[0]}</strong> 様,</p>
+          <p>申請書のPDFファイルが正常に作成されました。</p>
+          <p>PDFファイルは下記のリンクからダウンロードできます。</p>
+          <br>
           <p>Thank you for your application.</p>
+          <p>Your application form PDF has been successfully created.</p>
+          <p>Please download the PDF file using the link below.</p>
+          <br>
           <p>Best regards,<br>Application Form System</p>
         `,
         attachments: [{ 
@@ -434,6 +452,17 @@ export default function PreviewPage() {
       )}
 
       <style>{`
+        /* Fix: ensure Send button text in email modal is always visible */
+        .email-modal-actions .btn-primary {
+          background: linear-gradient(135deg, #1e3a8a, #1e40af);
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff;
+        }
+        .email-modal-actions .btn-primary .btn-text-jp {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff;
+        }
+
         .progress-overlay {
           position: fixed;
           top: 0;
