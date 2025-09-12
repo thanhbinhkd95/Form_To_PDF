@@ -106,6 +106,12 @@ function reducer(state, action) {
     case 'CLEAR_VALIDATION_ERRORS':
       return { ...state, validationErrors: {} }
     case 'SUBMIT_FORM':
+      // Clear localStorage sau khi submit thành công
+      try {
+        localStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.FORM_STATE)
+      } catch (err) {
+        console.warn('Clear localStorage error', err)
+      }
       return { 
         ...state, 
         isSubmitted: true, 

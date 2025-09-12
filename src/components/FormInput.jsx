@@ -1,8 +1,19 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { formText } from '../constants/formText.js'
+import { APP_CONSTANTS } from '../constants/appConstants.js'
 import { useForm } from '../hooks/useForm.js'
 import { useImage } from '../hooks/useImage.js'
 import { useFormContext } from '../context/useFormContext.js'
+import { ConfirmDialog } from './SharedDialog.jsx'
+import { 
+  Label, 
+  ErrorMessage, 
+  Input, 
+  Textarea, 
+  YesNo, 
+  Section, 
+  Row 
+} from './FormComponents.jsx'
 
 // Helper function to convert file to base64
 function fileToBase64(file) {
@@ -14,60 +25,6 @@ function fileToBase64(file) {
   })
 }
 
-function Label({ children }) {
-  return <label style={{ 
-    display: 'block', 
-    fontSize: 15, 
-    marginBottom: 8, 
-    color: '#1e3a8a', 
-    fontWeight: 700,
-    letterSpacing: '0.3px',
-    textTransform: 'none'
-  }}>{children}</label>
-}
-
-function ErrorMessage({ error }) {
-  if (!error) return null
-  return <div className="error-message" style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>{error}</div>
-}
-function Input({ type = 'text', value, onChange, placeholder, ...rest }) {
-  return (
-    <input 
-      type={type} 
-      value={value ?? ''} 
-      onChange={(e) => onChange(e.target.value)} 
-      placeholder={placeholder}
-      className="form-control" 
-      {...rest} 
-    />
-  )
-}
-function Textarea({ value, onChange, placeholder }) {
-  return (
-    <textarea 
-      value={value ?? ''} 
-      onChange={(e) => onChange(e.target.value)} 
-      placeholder={placeholder} 
-      className="form-control" 
-      style={{ minHeight: 96 }} 
-    />
-  )
-}
-function YesNo({ value, onChange }) {
-  return (
-    <div className="yesno-line">
-      <button type="button" className={value === 'Yes' ? 'active' : ''} onClick={() => onChange('Yes')}>Yes</button>
-      <button type="button" className={value === 'No' ? 'active' : ''} onClick={() => onChange('No')}>No</button>
-    </div>
-  )
-}
-function Section({ title }) {
-  return <h3 className="section-title">{title}</h3>
-}
-
-function Row({ children, cols = 2 }) {
-  return <div className="grid-2" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16 }}>{children}</div>
-}
 
 function Table({ columns, rows, onChange, addLabel = 'Add', onAdd }) {
   const handleCellChange = (rowIndex, columnKey, value) => {
@@ -136,11 +93,27 @@ export default function FormInput({ initialValues }) {
   const { state, dispatch } = useFormContext()
   const d = initialValues
   const photoInputRef = useRef(null)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
     clearValidationErrors()
     submitForm()
+  }
+
+  const handleClearForm = () => {
+    setShowConfirmDialog(true)
+  }
+
+  const confirmClearForm = () => {
+    dispatch({ type: 'RESET_FORM' })
+    // Clear localStorage
+    try {
+      localStorage.removeItem(APP_CONSTANTS.STORAGE_KEYS.FORM_STATE)
+    } catch (err) {
+      console.warn('Clear localStorage error', err)
+    }
+    setShowConfirmDialog(false)
   }
 
   const educationCols = useMemo(() => ([
@@ -203,6 +176,42 @@ export default function FormInput({ initialValues }) {
           <p className="form-instruction-jp">{formText.instruction.split('.')[0]}.</p>
           <p className="form-instruction-en">{formText.instruction.split('.')[1]}</p>
         </div>
+      </div>
+
+      {/* Clear Form Button */}
+      <div style={{ 
+        marginBottom: 24, 
+        textAlign: 'right',
+        padding: '12px 0',
+        borderBottom: '2px solid #e5e7eb'
+      }}>
+        <button 
+          type="button" 
+          onClick={handleClearForm}
+          className="btn btn-secondary"
+          style={{
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: '600',
+            border: '2px solid #d1d5db',
+            borderRadius: '8px',
+            background: 'white',
+            color: '#374151',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = '#f9fafb'
+            e.target.style.borderColor = '#9ca3af'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'white'
+            e.target.style.borderColor = '#d1d5db'
+          }}
+        >
+          フォーム削除 / Clear Form
+        </button>
       </div>
 
       <Section title="個人情報/ Personal Information" />
@@ -615,7 +624,7 @@ export default function FormInput({ initialValues }) {
                 dispatch({ type: 'ADD_ATTACHMENT', payload: newAttachment })
               } catch (error) {
                 console.error('Error processing file:', error)
-                alert('Lỗi khi xử lý file. Vui lòng thử lại.')
+                alert('ファイル処理エラー / File processing error. Please try again.')
               }
             }
           }
@@ -692,6 +701,15 @@ export default function FormInput({ initialValues }) {
         <div className="go-to-top-icon">↑</div>
         <div className="go-to-top-text">Go to top</div>
       </button>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={confirmClearForm}
+        title="フォーム削除確認 / Confirm Form Deletion"
+        message="フォームデータをすべて削除しますか？ / Are you sure you want to clear all form data?"
+      />
     </form>
   )
 }

@@ -4,10 +4,28 @@ import { usePdf } from '../hooks/usePdf.js'
 import { sendEmail } from '../utils/emailService.js'
 import { createAndDownloadPackage, showSaveDialog, downloadPackage } from '../utils/packageDownloader.js'
 import Preview from './Preview.jsx'
+import { AlertDialog } from './SharedDialog.jsx'
 
 export default function PreviewPage() {
   const { submittedData, resetToForm } = useForm()
   const { generatePdfFromFormData } = usePdf()
+  
+  // Dialog states
+  const [alertDialog, setAlertDialog] = useState({ 
+    isOpen: false, 
+    title: '', 
+    message: '', 
+    type: 'info' 
+  })
+
+  // Helper function to show alert
+  const showAlert = (title, message, type = 'info') => {
+    setAlertDialog({ isOpen: true, title, message, type })
+  }
+
+  const closeAlert = () => {
+    setAlertDialog({ isOpen: false, title: '', message: '', type: 'info' })
+  }
   
   // State cho progress indicator
   const [isCreatingPackage, setIsCreatingPackage] = useState(false)
@@ -127,7 +145,11 @@ export default function PreviewPage() {
       
     } catch (error) {
       console.error('Error creating PDF:', error)
-      alert(`❌ Error creating PDF.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`)
+      showAlert(
+        'PDF作成エラー / PDF Creation Error',
+        `PDFの作成中にエラーが発生しました / Error creating PDF.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`,
+        'error'
+      )
     } finally {
       if (!showSuccess) {
         setIsCreatingPackage(false)
@@ -163,11 +185,19 @@ export default function PreviewPage() {
         // User cancelled, don't show notification
       } else {
         console.error('Package creation failed:', result.error)
-        alert(`❌ ${result.message}\n\nError details: ${result.error?.message || 'Unknown error'}`)
+        showAlert(
+          'パッケージ作成エラー / Package Creation Error',
+          `${result.message}\n\nError details: ${result.error?.message || 'Unknown error'}`,
+          'error'
+        )
       }
     } catch (error) {
       console.error('Error creating package:', error)
-      alert(`❌ Error creating package.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`)
+      showAlert(
+        'パッケージ作成エラー / Package Creation Error',
+        `パッケージの作成中にエラーが発生しました / Error creating package.\n\nError details: ${error.message || 'Unknown error'}\n\nPlease try again.`,
+        'error'
+      )
     } finally {
       if (!showSuccess) {
         setIsCreatingPackage(false)
@@ -187,14 +217,22 @@ export default function PreviewPage() {
 
   const handleSendEmailConfirm = async () => {
     if (!emailForm.recipientEmail) {
-      alert('Vui lòng nhập địa chỉ email người nhận / Please enter recipient email address')
+      showAlert(
+        'メールアドレス入力エラー / Email Address Error',
+        '受信者のメールアドレスを入力してください / Please enter recipient email address',
+        'warning'
+      )
       return
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(emailForm.recipientEmail)) {
-      alert('Địa chỉ email không hợp lệ / Invalid email address')
+      showAlert(
+        'メールアドレス形式エラー / Invalid Email Format',
+        '正しいメールアドレス形式を入力してください / Invalid email address',
+        'warning'
+      )
       return
     }
 
@@ -245,11 +283,19 @@ Application Form System`,
       // Cleanup URL object
       setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000)
       
-      alert('✅ Email đã được gửi thành công! / Email sent successfully!')
+      showAlert(
+        'メール送信完了 / Email Sent Successfully',
+        'メールが正常に送信されました / Email sent successfully!',
+        'success'
+      )
       setEmailForm({ recipientEmail: '', showEmailForm: false })
     } catch (error) {
       console.error('Error sending email:', error)
-      alert(`❌ Gửi email thất bại / Failed to send email: ${error.message}`)
+      showAlert(
+        'メール送信エラー / Email Sending Failed',
+        `メールの送信に失敗しました / Failed to send email: ${error.message}`,
+        'error'
+      )
     } finally {
       setIsSendingEmail(false)
     }
@@ -770,6 +816,15 @@ Application Form System`,
           }
         }
       `}</style>
+
+      {/* Alert Dialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={closeAlert}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        type={alertDialog.type}
+      />
     </div>
   )
 }
