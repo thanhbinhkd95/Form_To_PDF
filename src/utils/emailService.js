@@ -14,7 +14,7 @@ emailjs.init(EMAILJS_CONFIG.publicKey)
 
 export async function sendEmail({ to, subject, text, html, attachments = [] }) {
   try {
-    console.log('Sending email with EmailJS...', { to, subject, attachments: attachments.length })
+    console.log('Sending email with EmailJS...', { to, subject, attachmentsCount: attachments.length })
     
     // Template parameters cho EmailJS
     const templateParams = {

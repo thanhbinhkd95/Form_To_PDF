@@ -1,5 +1,6 @@
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 import { storage } from '../config/firebase.js'
+import { APP_CONSTANTS } from '../constants/appConstants.js'
 
 /**
  * Upload PDF file to Firebase Storage
@@ -9,11 +10,11 @@ import { storage } from '../config/firebase.js'
  */
 export async function uploadPdfToStorage(pdfBlob, filename) {
   try {
-    console.log('Uploading PDF to Firebase Storage...', { filename, size: pdfBlob.size })
+    console.log('Uploading PDF to Firebase Storage...', { filename, sizeBytes: pdfBlob.size })
     
     // Create storage reference with timestamp to avoid conflicts
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const storageRef = ref(storage, `application-forms/${timestamp}_${filename}`)
+    const storageRef = ref(storage, `${APP_CONSTANTS.STORAGE_PATHS.APPLICATION_FORMS}${timestamp}_${filename}`)
     
     // Upload PDF blob to Firebase Storage
     const snapshot = await uploadBytes(storageRef, pdfBlob, {
@@ -43,6 +44,11 @@ export async function uploadPdfToStorage(pdfBlob, filename) {
  */
 export async function deletePdfFromStorage(downloadURL) {
   try {
+    if (!downloadURL || typeof downloadURL !== 'string') {
+      console.warn('Invalid download URL provided for deletion')
+      return
+    }
+    
     // Extract file path from download URL
     const url = new URL(downloadURL)
     const pathMatch = url.pathname.match(/\/o\/(.+)\?/)
@@ -70,3 +76,4 @@ export async function cleanupOldPdfs() {
   // Implementation for cleanup if needed
   console.log('Cleanup function - implement if needed')
 }
+

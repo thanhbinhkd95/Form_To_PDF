@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useFormContext } from '../context/useFormContext.js'
+import { APP_CONSTANTS } from '../constants/appConstants.js'
 
 export function useForm() {
   const { state, dispatch } = useFormContext()
@@ -33,7 +34,7 @@ export function useForm() {
     dispatch({ type: 'CLEAR_VALIDATION_ERRORS' })
   }, [dispatch])
 
-  function validate(values = state.formData, imageUrl = state.imageUrl) {
+  const validate = useCallback((values = state.formData, imageUrl = state.imageUrl) => {
     const errors = {}
     
     // Personal Information - Required fields
@@ -53,7 +54,7 @@ export function useForm() {
     if (!values.currentAddress?.trim()) errors.currentAddress = '現住所/Current Address is required'
     if (!values.phone?.trim()) errors.phone = '電話番号/Phone is required'
     if (!values.email?.trim()) errors.email = 'Eメール/E-mail is required'
-    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) errors.email = 'Eメール/E-mail format is invalid'
+    if (values.email && !APP_CONSTANTS.VALIDATION.EMAIL_REGEX.test(values.email)) errors.email = 'Eメール/E-mail format is invalid'
     if (!values.occupation?.trim()) errors.occupation = '職業/Occupation is required'
     
     // Education - Required fields
@@ -78,7 +79,7 @@ export function useForm() {
     if (!values.sponsor?.currentAddress?.trim()) errors.sponsorCurrentAddress = '経費支弁者現住所/Sponsor Current Address is required'
     if (!values.sponsor?.phone?.trim()) errors.sponsorPhone = '経費支弁者電話番号/Sponsor Phone is required'
     if (!values.sponsor?.email?.trim()) errors.sponsorEmail = '経費支弁者Eメール/Sponsor E-mail is required'
-    if (values.sponsor?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.sponsor.email)) errors.sponsorEmail = '経費支弁者Eメール/Sponsor E-mail format is invalid'
+    if (values.sponsor?.email && !APP_CONSTANTS.VALIDATION.EMAIL_REGEX.test(values.sponsor.email)) errors.sponsorEmail = '経費支弁者Eメール/Sponsor E-mail format is invalid'
     if (!values.sponsor?.company?.trim()) errors.sponsorCompany = '勤務先/Company is required'
     if (!values.sponsor?.position?.trim()) errors.sponsorPosition = '職種・役職/Occupation - Position is required'
     if (!values.sponsor?.annualIncomeJpy) errors.sponsorAnnualIncome = '年収(JPY)/Annual Income is required'
@@ -98,7 +99,7 @@ export function useForm() {
     }
     
     return { valid: Object.keys(errors).length === 0, errors }
-  }
+  }, [state.formData, state.imageUrl])
 
   const submitForm = useCallback(() => {
     const validation = validate(state.formData, state.imageUrl)
@@ -110,7 +111,7 @@ export function useForm() {
       setValidationErrors(validation.errors)
       return false
     }
-  }, [dispatch, setValidationErrors, state.formData, state.imageUrl])
+  }, [dispatch, setValidationErrors, state.formData, state.imageUrl, validate])
 
   return { 
     formData: state.formData, 

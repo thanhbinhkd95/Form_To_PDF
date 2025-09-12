@@ -15,8 +15,9 @@ export function useImage() {
     }
     const file = fileOrDataUrl
     const reader = new FileReader()
-    const url = await new Promise((resolve) => {
+    const url = await new Promise((resolve, reject) => {
       reader.onload = () => resolve(reader.result)
+      reader.onerror = () => reject(new Error('Failed to read file'))
       reader.readAsDataURL(file)
     })
     dispatch({ type: 'SET_IMAGE', payload: url })

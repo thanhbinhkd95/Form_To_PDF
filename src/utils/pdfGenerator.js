@@ -1,3 +1,5 @@
+import { APP_CONSTANTS } from '../constants/appConstants.js'
+
 // Tạo PDF từ DOM preview bằng html2canvas + jsPDF (tối ưu cho Application Form A4)
 export async function generatePdf({ selector = '#preview-root' } = {}) {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
@@ -17,7 +19,7 @@ export async function generatePdf({ selector = '#preview-root' } = {}) {
 
   // Cấu hình html2canvas tối ưu cho Application Form
   const canvas = await html2canvas(element, {
-    scale: 2, // Giảm scale để tránh lỗi memory
+    scale: APP_CONSTANTS.PDF.SCALE, // Giảm scale để tránh lỗi memory
     useCORS: true,
     backgroundColor: '#ffffff',
     allowTaint: true,
@@ -36,13 +38,13 @@ export async function generatePdf({ selector = '#preview-root' } = {}) {
     }
   })
 
-  const imgData = canvas.toDataURL('image/jpeg', 0.95) // Sử dụng JPEG với chất lượng cao
+  const imgData = canvas.toDataURL('image/jpeg', APP_CONSTANTS.PDF.QUALITY) // Sử dụng JPEG với chất lượng cao
 
   // Tạo PDF A4 với cấu hình tối ưu
   const pdf = new jsPDF({ 
-    orientation: 'p', 
-    unit: 'pt', 
-    format: 'a4',
+    orientation: APP_CONSTANTS.PDF.ORIENTATION, 
+    unit: APP_CONSTANTS.PDF.UNIT, 
+    format: APP_CONSTANTS.PDF.FORMAT,
     compress: true
   })
 
@@ -50,7 +52,7 @@ export async function generatePdf({ selector = '#preview-root' } = {}) {
   const pageHeight = pdf.internal.pageSize.getHeight()
 
   // Margin cho A4 (36pt = 12.7mm mỗi bên)
-  const margin = 36
+  const margin = APP_CONSTANTS.PDF.MARGIN
   const contentWidth = pageWidth - (margin * 2)
   const contentHeight = pageHeight - (margin * 2)
 

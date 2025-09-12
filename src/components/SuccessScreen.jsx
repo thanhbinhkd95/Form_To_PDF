@@ -1,7 +1,7 @@
 import { useForm } from '../hooks/useForm.js'
 
 export default function SuccessScreen() {
-  const { submittedData, resetToForm, navigateToPreview } = useForm()
+  const { resetToForm, navigateToPreview } = useForm()
 
   return (
     <div className="success-screen">

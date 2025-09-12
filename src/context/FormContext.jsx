@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer } from 'react'
 import { FormContext } from './context.js'
+import { APP_CONSTANTS } from '../constants/appConstants.js'
 
 const initialState = {
   formData: {
@@ -144,7 +145,7 @@ export function FormProvider({ children }) {
   // hydrate from localStorage
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('form_state_v1')
+      const raw = localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.FORM_STATE)
       if (raw) {
         const parsed = JSON.parse(raw)
         dispatch({ type: 'HYDRATE', payload: parsed })
@@ -154,20 +155,26 @@ export function FormProvider({ children }) {
     }
   }, [])
 
-  // persist minimal state
+  // persist minimal state with debouncing
   useEffect(() => {
-    const snapshot = {
-      formData: state.formData,
-      imageUrl: state.imageUrl,
-      theme: state.theme,
-      attachments: state.attachments.map(att => ({
-        ...att,
-        file: undefined // Remove file object for serialization
-      }))
-    }
-    try { localStorage.setItem('form_state_v1', JSON.stringify(snapshot)) } catch (err) {
-      console.warn('Persist state error', err)
-    }
+    const timeoutId = setTimeout(() => {
+      const snapshot = {
+        formData: state.formData,
+        imageUrl: state.imageUrl,
+        theme: state.theme,
+        attachments: state.attachments.map(att => ({
+          ...att,
+          file: undefined // Remove file object for serialization
+        }))
+      }
+      try { 
+        localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.FORM_STATE, JSON.stringify(snapshot)) 
+      } catch (err) {
+        console.warn('Persist state error', err)
+      }
+    }, APP_CONSTANTS.DEBOUNCE.LOCAL_STORAGE) // Debounce by 500ms
+
+    return () => clearTimeout(timeoutId)
   }, [state.formData, state.imageUrl, state.theme, state.attachments])
 
   // theme application
