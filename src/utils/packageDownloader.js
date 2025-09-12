@@ -2,6 +2,19 @@ import JSZip from 'jszip'
 import { generatePdfFromData } from './pdfGenerator.js'
 
 /**
+ * Convert base64 string to Blob
+ */
+function base64ToBlob(base64, mimeType = 'application/octet-stream') {
+  const byteCharacters = atob(base64.split(',')[1])
+  const byteNumbers = new Array(byteCharacters.length)
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+  const byteArray = new Uint8Array(byteNumbers)
+  return new Blob([byteArray], { type: mimeType })
+}
+
+/**
  * Tạo package ZIP chứa PDF form và tất cả file đính kèm
  * @param {Object} formData - Dữ liệu form đã submit
  * @param {string} imageUrl - URL của ảnh portrait
@@ -43,7 +56,7 @@ export async function createApplicationPackage(formData, imageUrl, onProgress) {
     
     // 3. Thêm các file đính kèm
     if (formData.attachments && formData.attachments.length > 0) {
-      console.log('Adding attachments...')
+      console.log('Adding attachments...', formData.attachments.length, 'files')
       if (onProgress) onProgress('Adding attachments...', 60)
       
       let attachmentCount = 0
@@ -54,6 +67,9 @@ export async function createApplicationPackage(formData, imageUrl, onProgress) {
           if (attachment.file && attachment.file instanceof File) {
             // File object trực tiếp
             fileBlob = attachment.file
+          } else if (attachment.base64) {
+            // File từ base64 string
+            fileBlob = base64ToBlob(attachment.base64, attachment.type)
           } else if (attachment.previewUrl) {
             // File từ URL
             fileBlob = await fetch(attachment.previewUrl).then(res => res.blob())

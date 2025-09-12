@@ -1,20 +1,26 @@
 import { useState, useEffect } from 'react'
 import { useForm } from '../hooks/useForm.js'
 import { usePdf } from '../hooks/usePdf.js'
-import { useEmail } from '../hooks/useEmail.js'
+import { sendEmail } from '../utils/emailService.js'
 import { createAndDownloadPackage, showSaveDialog, downloadPackage } from '../utils/packageDownloader.js'
 import Preview from './Preview.jsx'
 
 export default function PreviewPage() {
   const { submittedData, resetToForm } = useForm()
   const { generatePdfFromFormData } = usePdf()
-  const { sendEmail } = useEmail()
   
   // State cho progress indicator
   const [isCreatingPackage, setIsCreatingPackage] = useState(false)
   const [progress, setProgress] = useState({ message: '', percentage: 0 })
   const [showSuccess, setShowSuccess] = useState(false)
   const [successInfo, setSuccessInfo] = useState({ filename: '', size: 0 })
+  
+  // State cho email form
+  const [emailForm, setEmailForm] = useState({
+    recipientEmail: '',
+    showEmailForm: false
+  })
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
   
   // State cho scroll behavior
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
@@ -167,13 +173,72 @@ export default function PreviewPage() {
   }
 
   const handleSendEmail = async () => {
+    // Hiển thị form nhập email
+    setEmailForm({ ...emailForm, showEmailForm: true })
+  }
+
+  const handleSendEmailConfirm = async () => {
+    if (!emailForm.recipientEmail) {
+      alert('Vui lòng nhập địa chỉ email người nhận / Please enter recipient email address')
+      return
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailForm.recipientEmail)) {
+      alert('Địa chỉ email không hợp lệ / Invalid email address')
+      return
+    }
+
     try {
-      await sendEmail(submittedData, submittedData.imageUrl)
-      alert('Email sent successfully!')
+      setIsSendingEmail(true)
+      
+      // Tạo PDF trước
+      console.log('Creating PDF for email...')
+      const pdfBlob = await generatePdfFromFormData(submittedData, submittedData.imageUrl)
+      
+      // Tạo download link cho PDF
+      const pdfUrl = URL.createObjectURL(pdfBlob)
+      const fileName = `Application_Form_${new Date().toISOString().slice(0, 10)}.pdf`
+      
+      // Gửi email với PDF download link
+      console.log('Sending email with PDF download link...')
+      await sendEmail({
+        to: emailForm.recipientEmail,
+        subject: '申請書の送信完了 / Application Form Submission',
+        text: `Xin chào ${emailForm.recipientEmail.split('@')[0]},\n\nĐây là bản PDF của form đăng ký của bạn.\n\nVui lòng truy cập ứng dụng để tải xuống PDF.\n\nThank you for your application.`,
+        html: `
+          <p>Xin chào <strong>${emailForm.recipientEmail.split('@')[0]}</strong>,</p>
+          <p>Đây là bản PDF của form đăng ký của bạn.</p>
+          <p><strong>Để tải xuống PDF:</strong></p>
+          <ol>
+            <li>Truy cập ứng dụng: <a href="${window.location.origin}">${window.location.origin}</a></li>
+            <li>Điền lại form hoặc sử dụng chức năng "Download PDF"</li>
+          </ol>
+          <p>Thank you for your application.</p>
+          <p>Best regards,<br>Application Form System</p>
+        `,
+        attachments: [{ 
+          filename: fileName, 
+          blob: pdfBlob 
+        }]
+      })
+      
+      // Cleanup URL object
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000)
+      
+      alert('✅ Email đã được gửi thành công! / Email sent successfully!')
+      setEmailForm({ recipientEmail: '', showEmailForm: false })
     } catch (error) {
       console.error('Error sending email:', error)
-      alert('Failed to send email. Please try again.')
+      alert(`❌ Gửi email thất bại / Failed to send email: ${error.message}`)
+    } finally {
+      setIsSendingEmail(false)
     }
+  }
+
+  const handleCancelEmail = () => {
+    setEmailForm({ recipientEmail: '', showEmailForm: false })
   }
 
   return (
@@ -221,8 +286,11 @@ export default function PreviewPage() {
             <button 
               className="btn btn-primary" 
               onClick={handleSendEmail}
+              disabled={isSendingEmail}
             >
-              <span className="btn-text-jp">メール送信 / Send Email</span>
+              <span className="btn-text-jp">
+                {isSendingEmail ? '⏳ 送信中... / Sending...' : '📧 メール送信 / Send Email'}
+              </span>
             </button>
           </div>
         </div>
@@ -294,6 +362,65 @@ export default function PreviewPage() {
           <span className="btn-text-jp">申請書に戻る / Back to Form</span>
         </button>
       </div>
+
+      {/* Email Form Modal */}
+      {emailForm.showEmailForm && (
+        <div className="email-modal-overlay">
+          <div className="email-modal">
+            <div className="email-modal-header">
+              <h3>📧 メール送信 / Send Email</h3>
+              <button 
+                className="email-modal-close"
+                onClick={handleCancelEmail}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="email-modal-content">
+              <div className="email-input-group">
+                <label htmlFor="recipient-email">
+                  <span className="label-jp">受信者メールアドレス / Recipient Email</span>
+                </label>
+                <input
+                  id="recipient-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={emailForm.recipientEmail}
+                  onChange={(e) => setEmailForm({...emailForm, recipientEmail: e.target.value})}
+                  disabled={isSendingEmail}
+                />
+              </div>
+              
+              <div className="email-info">
+                <p className="email-info-text">
+                  <span className="info-jp">申請書のPDFファイルが自動的に添付されます。</span>
+                  <span className="info-en">Application form PDF will be automatically attached.</span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="email-modal-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={handleCancelEmail}
+                disabled={isSendingEmail}
+              >
+                <span className="btn-text-jp">キャンセル / Cancel</span>
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={handleSendEmailConfirm}
+                disabled={isSendingEmail || !emailForm.recipientEmail}
+              >
+                <span className="btn-text-jp">
+                  {isSendingEmail ? '⏳ 送信中... / Sending...' : '📧 送信 / Send'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating action button để hiện lại header */}
       {!isHeaderVisible && (
@@ -462,6 +589,155 @@ export default function PreviewPage() {
           .preview-page-actions {
             grid-template-columns: 1fr;
             gap: 8px;
+          }
+        }
+
+        /* Email Modal Styles */
+        .email-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .email-modal {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          min-width: 400px;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .email-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem 1.5rem 1rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .email-modal-header h3 {
+          margin: 0;
+          color: #1e3a8a;
+          font-size: 1.25rem;
+        }
+
+        .email-modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: #6b7280;
+          cursor: pointer;
+          padding: 0.25rem;
+          line-height: 1;
+        }
+
+        .email-modal-close:hover {
+          color: #374151;
+        }
+
+        .email-modal-content {
+          padding: 1.5rem;
+        }
+
+        .email-input-group {
+          margin-bottom: 1rem;
+        }
+
+        .email-input-group label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        .label-jp {
+          display: block;
+          font-size: 0.9rem;
+          color: #6b7280;
+        }
+
+        .email-input-group input {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          font-size: 1rem;
+          transition: border-color 0.2s;
+          box-sizing: border-box;
+        }
+
+        .email-input-group input:focus {
+          outline: none;
+          border-color: #3b82f6;
+        }
+
+        .email-input-group input:disabled {
+          background-color: #f9fafb;
+          cursor: not-allowed;
+        }
+
+        .email-info {
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .email-info-text {
+          margin: 0;
+          font-size: 0.9rem;
+          color: #0369a1;
+        }
+
+        .info-jp {
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+
+        .info-en {
+          display: block;
+          font-style: italic;
+        }
+
+        .email-modal-actions {
+          display: flex;
+          gap: 0.75rem;
+          padding: 1rem 1.5rem 1.5rem;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .email-modal-actions .btn {
+          flex: 1;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .email-modal-actions .btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 480px) {
+          .email-modal {
+            min-width: 90vw;
+            margin: 1rem;
+          }
+          
+          .email-modal-actions {
+            flex-direction: column;
           }
         }
       `}</style>

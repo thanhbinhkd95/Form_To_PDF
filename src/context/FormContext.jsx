@@ -91,8 +91,11 @@ function reducer(state, action) {
       return { ...state, status: { ...state.status, ...action.payload } }
     case 'SET_PDF':
       return { ...state, pdfBlob: action.payload }
-    case 'ADD_ATTACHMENT':
-      return { ...state, attachments: [...state.attachments, action.payload] }
+    case 'ADD_ATTACHMENT': {
+      // Thay thế attachment cũ nếu có cùng key, hoặc thêm mới
+      const filteredAttachments = state.attachments.filter(att => att.key !== action.payload.key)
+      return { ...state, attachments: [...filteredAttachments, action.payload] }
+    }
     case 'REMOVE_ATTACHMENT':
       return { ...state, attachments: state.attachments.filter((_, i) => i !== action.payload) }
     case 'SET_THEME':
@@ -157,11 +160,15 @@ export function FormProvider({ children }) {
       formData: state.formData,
       imageUrl: state.imageUrl,
       theme: state.theme,
+      attachments: state.attachments.map(att => ({
+        ...att,
+        file: undefined // Remove file object for serialization
+      }))
     }
     try { localStorage.setItem('form_state_v1', JSON.stringify(snapshot)) } catch (err) {
       console.warn('Persist state error', err)
     }
-  }, [state.formData, state.imageUrl, state.theme])
+  }, [state.formData, state.imageUrl, state.theme, state.attachments])
 
   // theme application
   useEffect(() => {

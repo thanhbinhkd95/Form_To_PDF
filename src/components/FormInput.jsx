@@ -2,6 +2,17 @@ import { useMemo, useRef } from 'react'
 import { formText } from '../constants/formText.js'
 import { useForm } from '../hooks/useForm.js'
 import { useImage } from '../hooks/useImage.js'
+import { useFormContext } from '../context/useFormContext.js'
+
+// Helper function to convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = error => reject(error)
+  })
+}
 
 function Label({ children }) {
   return <label style={{ 
@@ -122,6 +133,7 @@ function Table({ columns, rows, onChange, addLabel = 'Add', onAdd }) {
 export default function FormInput({ initialValues }) {
   const { updateForm, submitForm, validationErrors, clearValidationErrors } = useForm()
   const { imageUrl, setImage } = useImage()
+  const { state, dispatch } = useFormContext()
   const d = initialValues
   const photoInputRef = useRef(null)
 
@@ -583,23 +595,30 @@ export default function FormInput({ initialValues }) {
           { label: 'Certificate Upload', key: 'certificate' },
           { label: 'Other Upload', key: 'other' }
         ].map(({ label, key }, index) => {
-          const handleFileChange = (e) => {
+          const currentAttachment = state.attachments?.find(att => att.key === key)
+          
+          const handleFileChange = async (e) => {
             const file = e.target.files?.[0]
             if (file) {
-              const newAttachment = { 
-                name: file.name, 
-                size: file.size, 
-                type: file.type, 
-                key: key,
-                file: file 
+              try {
+                // Convert file to base64 for storage
+                const base64 = await fileToBase64(file)
+                const newAttachment = { 
+                  name: file.name, 
+                  size: file.size, 
+                  type: file.type, 
+                  key: key,
+                  base64: base64,
+                  file: file // Keep original file for immediate use
+                }
+                // Lưu attachment vào state level thay vì formData
+                dispatch({ type: 'ADD_ATTACHMENT', payload: newAttachment })
+              } catch (error) {
+                console.error('Error processing file:', error)
+                alert('Lỗi khi xử lý file. Vui lòng thử lại.')
               }
-              const existingAttachments = d.attachments || []
-              const filteredAttachments = existingAttachments.filter(att => att.key !== key)
-              updateForm({ attachments: [...filteredAttachments, newAttachment] })
             }
           }
-
-          const currentAttachment = d.attachments?.find(att => att.key === key)
 
           return (
             <div key={index}>
