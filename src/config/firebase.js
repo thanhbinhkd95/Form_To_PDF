@@ -6,14 +6,14 @@ import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBItOUh-Y6vSdQNue4lU5aAIcNFevDp1N4",
-  authDomain: "form-to-pdf-52d69.firebaseapp.com",
-  projectId: "form-to-pdf-52d69",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   // Firebase Storage bucket phải có dạng <project-id>.appspot.com
-  storageBucket: "form-to-pdf-52d69.appspot.com",
-  messagingSenderId: "326642896214",
-  appId: "1:326642896214:web:edf4d4f8c19067fef4daf7",
-  measurementId: "G-PCXG4LQG2K",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
