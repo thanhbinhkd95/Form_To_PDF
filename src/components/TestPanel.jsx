@@ -215,7 +215,16 @@ export default function TestPanel() {
         position: 'fixed',
         top: '20px',
         right: '20px',
-        zIndex: 1000
+        zIndex: 1000,
+        // Mobile positioning
+        '@media (max-width: 768px)': {
+          top: '10px',
+          right: '10px',
+        },
+        '@media (max-width: 480px)': {
+          top: '5px',
+          right: '5px',
+        },
       }}>
         <button
           onClick={() => setIsTestPanelOpen(true)}
@@ -229,7 +238,17 @@ export default function TestPanel() {
             fontSize: '14px',
             fontWeight: '600',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            minHeight: '44px', // Touch-friendly
+            // Mobile responsive
+            '@media (max-width: 768px)': {
+              padding: '10px 12px',
+              fontSize: '12px',
+            },
+            '@media (max-width: 480px)': {
+              padding: '8px 10px',
+              fontSize: '11px',
+            },
           }}
           onMouseOver={(e) => e.target.style.backgroundColor = '#1e40af'}
           onMouseOut={(e) => e.target.style.backgroundColor = '#1e3a8a'}
@@ -253,7 +272,23 @@ export default function TestPanel() {
       zIndex: 1000,
       padding: '20px',
       maxHeight: '80vh',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      // Mobile responsive
+      '@media (max-width: 768px)': {
+        top: '10px',
+        right: '10px',
+        left: '10px',
+        width: 'auto',
+        maxHeight: '90vh',
+        padding: '16px',
+      },
+      '@media (max-width: 480px)': {
+        top: '5px',
+        right: '5px',
+        left: '5px',
+        padding: '12px',
+        maxHeight: '95vh',
+      },
     }}>
       <div style={{
         display: 'flex',

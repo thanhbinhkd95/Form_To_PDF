@@ -128,12 +128,14 @@ export function AlertDialog({
           <button
             onClick={handleClose}
             style={{
-              padding: "10px 20px",
+              padding: "12px 24px",
               borderRadius: "8px",
               border: "none",
               cursor: "pointer",
               fontSize: "14px",
               fontWeight: "600",
+              minHeight: "44px", // Touch-friendly
+              minWidth: "100px",
               ...getButtonStyle(),
             }}
           >
@@ -231,12 +233,13 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
             display: "flex",
             gap: "12px",
             justifyContent: "flex-end",
+            flexWrap: "wrap", // Allow wrapping on mobile
           }}
         >
           <button
             onClick={handleClose}
             style={{
-              padding: "10px 20px",
+              padding: "12px 20px",
               borderRadius: "8px",
               border: "2px solid #d1d5db",
               background: "white",
@@ -244,6 +247,8 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
               cursor: "pointer",
               fontSize: "14px",
               fontWeight: "600",
+              minHeight: "44px", // Touch-friendly
+              minWidth: "100px",
             }}
           >
             キャンセル / Cancel
@@ -251,7 +256,7 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
           <button
             onClick={handleConfirm}
             style={{
-              padding: "10px 20px",
+              padding: "12px 20px",
               borderRadius: "8px",
               border: "none",
               background: "#dc2626",
@@ -259,6 +264,8 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
               cursor: "pointer",
               fontSize: "14px",
               fontWeight: "600",
+              minHeight: "44px", // Touch-friendly
+              minWidth: "100px",
             }}
           >
             確認 / Confirm

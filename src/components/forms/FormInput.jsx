@@ -35,8 +35,15 @@ function Table({ columns, rows, onChange, addLabel = "Add", onAdd }) {
 
   return (
     <div>
-      <div style={{ overflowX: "auto" }}>
-        <table className="table-styled">
+      <div
+        style={{
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
+          border: "1px solid var(--color-border)",
+          borderRadius: "8px",
+        }}
+      >
+        <table className="table-styled" style={{ minWidth: "100%" }}>
           <thead>
             <tr>
               {columns.map((column, index) => (
@@ -45,8 +52,11 @@ function Table({ columns, rows, onChange, addLabel = "Add", onAdd }) {
                   style={{
                     textAlign: "left",
                     border: "1px solid var(--color-border)",
-                    padding: 8,
+                    padding: "8px 6px",
                     background: "var(--color-background-tertiary)",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {column.label}
@@ -62,11 +72,12 @@ function Table({ columns, rows, onChange, addLabel = "Add", onAdd }) {
                     key={columnIndex}
                     style={{
                       border: "1px solid var(--color-border)",
-                      padding: 6,
+                      padding: "6px 4px",
+                      verticalAlign: "middle",
                     }}
                   >
                     {column.isStatic ? (
-                      <strong>{row.label}</strong>
+                      <strong style={{ fontSize: "11px" }}>{row.label}</strong>
                     ) : (
                       <Input
                         value={row[column.key]}
@@ -74,6 +85,11 @@ function Table({ columns, rows, onChange, addLabel = "Add", onAdd }) {
                           handleCellChange(rowIndex, column.key, value)
                         }
                         placeholder={column.placeholder}
+                        style={{
+                          fontSize: "12px",
+                          padding: "6px 8px",
+                          minWidth: "80px",
+                        }}
                       />
                     )}
                   </td>
@@ -84,8 +100,17 @@ function Table({ columns, rows, onChange, addLabel = "Add", onAdd }) {
         </table>
       </div>
       {onAdd && (
-        <div style={{ marginTop: 8 }}>
-          <button type="button" className="btn btn-secondary" onClick={onAdd}>
+        <div style={{ marginTop: 12, textAlign: "center" }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={onAdd}
+            style={{
+              padding: "10px 20px",
+              fontSize: "14px",
+              minHeight: "44px",
+            }}
+          >
             {addLabel}
           </button>
         </div>
@@ -869,6 +894,15 @@ export default function FormInput({ initialValues }) {
             transition: "all 0.2s ease",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
             margin: "0 auto",
+            // Mobile responsive
+            "@media (max-width: 768px)": {
+              width: "150px",
+              height: "200px",
+            },
+            "@media (max-width: 480px)": {
+              width: "120px",
+              height: "160px",
+            },
           }}
         >
           {imageUrl ? (
@@ -1039,6 +1073,21 @@ export default function FormInput({ initialValues }) {
             textTransform: "uppercase",
             position: "relative",
             overflow: "hidden",
+            minHeight: "56px",
+            width: "100%",
+            maxWidth: "300px",
+            // Mobile responsive
+            "@media (max-width: 768px)": {
+              padding: "14px 32px",
+              fontSize: "16px",
+              minHeight: "52px",
+            },
+            "@media (max-width: 480px)": {
+              padding: "12px 24px",
+              fontSize: "14px",
+              minHeight: "48px",
+              maxWidth: "100%",
+            },
           }}
           onMouseEnter={(e) => {
             e.target.style.transform = "translateY(-3px)";
