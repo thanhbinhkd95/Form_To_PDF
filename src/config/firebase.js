@@ -26,20 +26,8 @@ export const storage = getStorage(app);
 // Chỉ bật nếu có cấu hình key, và hỗ trợ debug khi chạy dev/local
 (() => {
   const siteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  try {
-    console.log("AppCheck siteKey =", siteKey);
-    console.log(
-      "VITE_RECAPTCHA_V3_SITE_KEY =",
-      import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY
-    );
-    console.log(
-      "All import.meta.env keys =",
-      Object.keys(import.meta.env || {})
-    );
-  } catch {
-    // ignore console errors in non-browser environments
-  }
   if (!siteKey) return;
+
   if (import.meta.env.DEV) {
     try {
       self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -47,6 +35,7 @@ export const storage = getStorage(app);
       // ignore if not in browser worker/global scope
     }
   }
+
   initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(siteKey),
     isTokenAutoRefreshEnabled: true,
