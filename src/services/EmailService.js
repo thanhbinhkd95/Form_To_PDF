@@ -40,8 +40,7 @@ export class EmailService {
         to,
         subject,
         text,
-        html,
-        attachments
+        html
       );
 
       // Process PDF attachment if present
@@ -186,7 +185,7 @@ export class EmailService {
    * Prepare template parameters for EmailJS
    * @private
    */
-  _prepareTemplateParams(to, subject, text, html, attachments) {
+  _prepareTemplateParams(to, subject, text, html) {
     return {
       to_email: to,
       to_name: to.split("@")[0],

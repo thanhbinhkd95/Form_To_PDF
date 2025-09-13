@@ -41,13 +41,25 @@ export function AlertDialog({
     const { COLORS } = UI_CONSTANTS;
     switch (type) {
       case "success":
-        return `background: linear-gradient(135deg, ${COLORS.SUCCESS} 0%, ${COLORS.SUCCESS_DARK} 100%); color: white;`;
+        return {
+          background: `linear-gradient(135deg, ${COLORS.SUCCESS} 0%, ${COLORS.SUCCESS_DARK} 100%)`,
+          color: "white",
+        };
       case "error":
-        return `background: linear-gradient(135deg, ${COLORS.ERROR} 0%, ${COLORS.ERROR_DARK} 100%); color: white;`;
+        return {
+          background: `linear-gradient(135deg, ${COLORS.ERROR} 0%, ${COLORS.ERROR_DARK} 100%)`,
+          color: "white",
+        };
       case "warning":
-        return `background: linear-gradient(135deg, ${COLORS.WARNING} 0%, ${COLORS.WARNING_DARK} 100%); color: white;`;
+        return {
+          background: `linear-gradient(135deg, ${COLORS.WARNING} 0%, ${COLORS.WARNING_DARK} 100%)`,
+          color: "white",
+        };
       default:
-        return `background: linear-gradient(135deg, ${COLORS.PRIMARY} 0%, ${COLORS.PRIMARY_LIGHT} 100%); color: white;`;
+        return {
+          background: `linear-gradient(135deg, ${COLORS.PRIMARY} 0%, ${COLORS.PRIMARY_LIGHT} 100%)`,
+          color: "white",
+        };
     }
   };
 

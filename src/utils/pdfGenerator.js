@@ -1,9 +1,9 @@
 import { APP_CONSTANTS } from "../constants/appConstants.js";
 
-// Tạo PDF từ DOM preview bằng html2canvas + jsPDF (tối ưu cho Application Form A4)
+// Tạo PDF từ DOM preview bằng html-to-image + jsPDF (tối ưu cho Application Form A4)
 export async function generatePdf({ selector = "#preview-root" } = {}) {
-  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-    import("html2canvas"),
+  const [htmlToImage, { jsPDF }] = await Promise.all([
+    import("html-to-image"),
     import("jspdf"),
   ]);
 
@@ -17,30 +17,25 @@ export async function generatePdf({ selector = "#preview-root" } = {}) {
   // Đợi CSS được áp dụng
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  // Cấu hình html2canvas tối ưu cho Application Form
-  const canvas = await html2canvas(element, {
-    scale: APP_CONSTANTS.PDF.SCALE, // Giảm scale để tránh lỗi memory
-    useCORS: true,
+  // Sử dụng html-to-image thay vì html2canvas để tránh lỗi CSSStyleDeclaration
+  const dataUrl = await htmlToImage.toPng(element, {
+    quality: APP_CONSTANTS.PDF.QUALITY,
+    pixelRatio: APP_CONSTANTS.PDF.SCALE,
     backgroundColor: "#ffffff",
-    allowTaint: true,
-    foreignObjectRendering: false, // Tắt để tránh lỗi
-    logging: false,
-    width: element.offsetWidth,
-    height: element.offsetHeight,
-    scrollX: 0,
-    scrollY: 0,
-    windowWidth: element.offsetWidth,
-    windowHeight: element.offsetHeight,
-    ignoreElements: (element) => {
+    style: {
+      transform: "scale(1)",
+      transformOrigin: "top left",
+      position: "static",
+      overflow: "visible",
+    },
+    filter: (node) => {
       // Bỏ qua các element có thể gây lỗi
-      return (
-        element.classList.contains("preview-actions") ||
-        element.classList.contains("preview-modal-header")
+      return !(
+        node.classList?.contains("preview-actions") ||
+        node.classList?.contains("preview-modal-header")
       );
     },
   });
-
-  const imgData = canvas.toDataURL("image/jpeg", APP_CONSTANTS.PDF.QUALITY); // Sử dụng JPEG với chất lượng cao
 
   // Tạo PDF A4 với cấu hình tối ưu
   const pdf = new jsPDF({
@@ -58,46 +53,55 @@ export async function generatePdf({ selector = "#preview-root" } = {}) {
   const contentWidth = pageWidth - margin * 2;
   const contentHeight = pageHeight - margin * 2;
 
+  // Tạo image object để lấy dimensions
+  const img = new Image();
+  img.src = dataUrl;
+
+  // Đợi image load
+  await new Promise((resolve) => {
+    img.onload = resolve;
+  });
+
   // Tính toán tỷ lệ để vừa với chiều rộng trang
-  const scale = contentWidth / canvas.width;
-  const scaledHeight = canvas.height * scale;
+  const scale = contentWidth / img.width;
+  const scaledHeight = img.height * scale;
 
   // Nếu nội dung vừa trong 1 trang
   if (scaledHeight <= contentHeight) {
-    pdf.addImage(imgData, "JPEG", margin, margin, contentWidth, scaledHeight);
+    pdf.addImage(dataUrl, "PNG", margin, margin, contentWidth, scaledHeight);
   } else {
     // Nếu nội dung dài hơn 1 trang, chia thành nhiều trang
     let yPosition = margin;
     let sourceY = 0;
     const sourceHeight = contentHeight / scale;
 
-    while (sourceY < canvas.height) {
+    while (sourceY < img.height) {
       // Tạo canvas cho từng trang
       const pageCanvas = document.createElement("canvas");
       const pageCtx = pageCanvas.getContext("2d");
 
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.min(sourceHeight, canvas.height - sourceY);
+      pageCanvas.width = img.width;
+      pageCanvas.height = Math.min(sourceHeight, img.height - sourceY);
 
       // Vẽ phần của ảnh gốc lên canvas trang
       pageCtx.drawImage(
-        canvas,
+        img,
         0,
         sourceY,
-        canvas.width,
+        img.width,
         pageCanvas.height,
         0,
         0,
-        canvas.width,
+        img.width,
         pageCanvas.height
       );
 
-      const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.95);
+      const pageImgData = pageCanvas.toDataURL("image/png", 0.95);
       const pageImgHeight = pageCanvas.height * scale;
 
       pdf.addImage(
         pageImgData,
-        "JPEG",
+        "PNG",
         margin,
         yPosition,
         contentWidth,
@@ -107,7 +111,7 @@ export async function generatePdf({ selector = "#preview-root" } = {}) {
       sourceY += sourceHeight;
 
       // Thêm trang mới nếu còn nội dung
-      if (sourceY < canvas.height) {
+      if (sourceY < img.height) {
         pdf.addPage();
         yPosition = margin;
       }
@@ -146,6 +150,7 @@ export async function generatePdfFromData(formData, imageUrl) {
 
   document.body.appendChild(tempContainer);
 
+  let root = null;
   try {
     // Import Preview component và render
     const { default: Preview } = await import(
@@ -154,7 +159,7 @@ export async function generatePdfFromData(formData, imageUrl) {
     const { createRoot } = await import("react-dom/client");
     const React = await import("react");
 
-    const root = createRoot(tempContainer);
+    root = createRoot(tempContainer);
     root.render(
       React.createElement(
         React.StrictMode,
@@ -167,8 +172,8 @@ export async function generatePdfFromData(formData, imageUrl) {
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Tạo PDF và trả về blob
-    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-      import("html2canvas"),
+    const [htmlToImage, { jsPDF }] = await Promise.all([
+      import("html-to-image"),
       import("jspdf"),
     ]);
 
@@ -182,29 +187,25 @@ export async function generatePdfFromData(formData, imageUrl) {
     // Đợi CSS được áp dụng
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Cấu hình html2canvas tối ưu cho Application Form
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
+    // Sử dụng html-to-image thay vì html2canvas để tránh lỗi CSSStyleDeclaration
+    const dataUrl = await htmlToImage.toPng(element, {
+      quality: 0.95,
+      pixelRatio: 2,
       backgroundColor: "#ffffff",
-      allowTaint: true,
-      foreignObjectRendering: false,
-      logging: false,
-      width: element.offsetWidth,
-      height: element.offsetHeight,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: element.offsetWidth,
-      windowHeight: element.offsetHeight,
-      ignoreElements: (element) => {
-        return (
-          element.classList.contains("preview-actions") ||
-          element.classList.contains("preview-modal-header")
+      style: {
+        transform: "scale(1)",
+        transformOrigin: "top left",
+        position: "static",
+        overflow: "visible",
+      },
+      filter: (node) => {
+        // Bỏ qua các element có thể gây lỗi
+        return !(
+          node.classList?.contains("preview-actions") ||
+          node.classList?.contains("preview-modal-header")
         );
       },
     });
-
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
     // Tạo PDF A4 với cấu hình tối ưu
     const pdf = new jsPDF({
@@ -222,46 +223,55 @@ export async function generatePdfFromData(formData, imageUrl) {
     const contentWidth = pageWidth - margin * 2;
     const contentHeight = pageHeight - margin * 2;
 
+    // Tạo image object để lấy dimensions
+    const img = new Image();
+    img.src = dataUrl;
+
+    // Đợi image load
+    await new Promise((resolve) => {
+      img.onload = resolve;
+    });
+
     // Tính toán tỷ lệ để vừa với chiều rộng trang
-    const scale = contentWidth / canvas.width;
-    const scaledHeight = canvas.height * scale;
+    const scale = contentWidth / img.width;
+    const scaledHeight = img.height * scale;
 
     // Nếu nội dung vừa trong 1 trang
     if (scaledHeight <= contentHeight) {
-      pdf.addImage(imgData, "JPEG", margin, margin, contentWidth, scaledHeight);
+      pdf.addImage(dataUrl, "PNG", margin, margin, contentWidth, scaledHeight);
     } else {
       // Nếu nội dung dài hơn 1 trang, chia thành nhiều trang
       let yPosition = margin;
       let sourceY = 0;
       const sourceHeight = contentHeight / scale;
 
-      while (sourceY < canvas.height) {
+      while (sourceY < img.height) {
         // Tạo canvas cho từng trang
         const pageCanvas = document.createElement("canvas");
         const pageCtx = pageCanvas.getContext("2d");
 
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = Math.min(sourceHeight, canvas.height - sourceY);
+        pageCanvas.width = img.width;
+        pageCanvas.height = Math.min(sourceHeight, img.height - sourceY);
 
         // Vẽ phần của ảnh gốc lên canvas trang
         pageCtx.drawImage(
-          canvas,
+          img,
           0,
           sourceY,
-          canvas.width,
+          img.width,
           pageCanvas.height,
           0,
           0,
-          canvas.width,
+          img.width,
           pageCanvas.height
         );
 
-        const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.95);
+        const pageImgData = pageCanvas.toDataURL("image/png", 0.95);
         const pageImgHeight = pageCanvas.height * scale;
 
         pdf.addImage(
           pageImgData,
-          "JPEG",
+          "PNG",
           margin,
           yPosition,
           contentWidth,
@@ -271,7 +281,7 @@ export async function generatePdfFromData(formData, imageUrl) {
         sourceY += sourceHeight;
 
         // Thêm trang mới nếu còn nội dung
-        if (sourceY < canvas.height) {
+        if (sourceY < img.height) {
           pdf.addPage();
           yPosition = margin;
         }
@@ -283,7 +293,18 @@ export async function generatePdfFromData(formData, imageUrl) {
 
     return pdf.output("blob");
   } finally {
-    // Cleanup
-    document.body.removeChild(tempContainer);
+    // Cleanup - unmount React component trước khi remove DOM
+    if (root) {
+      try {
+        root.unmount();
+      } catch (e) {
+        console.warn("Error unmounting React component:", e);
+      }
+    }
+
+    // Cleanup DOM
+    if (tempContainer && tempContainer.parentNode) {
+      document.body.removeChild(tempContainer);
+    }
   }
 }
