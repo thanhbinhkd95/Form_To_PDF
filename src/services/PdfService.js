@@ -335,7 +335,9 @@ export class PdfService {
    * @private
    */
   async _renderPreviewComponent(container, formData, imageUrl) {
-    const { default: Preview } = await import("../components/Preview.jsx");
+    const { default: Preview } = await import(
+      "../components/preview/Preview.jsx"
+    );
     const { createRoot } = await import("react-dom/client");
     const React = await import("react");
 

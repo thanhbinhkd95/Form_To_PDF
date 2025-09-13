@@ -148,7 +148,9 @@ export async function generatePdfFromData(formData, imageUrl) {
 
   try {
     // Import Preview component và render
-    const { default: Preview } = await import("../components/Preview.jsx");
+    const { default: Preview } = await import(
+      "../components/preview/Preview.jsx"
+    );
     const { createRoot } = await import("react-dom/client");
     const React = await import("react");
 

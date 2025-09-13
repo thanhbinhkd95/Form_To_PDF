@@ -151,7 +151,9 @@ export class PdfController {
 
       try {
         // Import Preview component and render
-        const { default: Preview } = await import("../components/Preview.jsx");
+        const { default: Preview } = await import(
+          "../components/preview/Preview.jsx"
+        );
         const { createRoot } = await import("react-dom/client");
         const React = await import("react");
 
